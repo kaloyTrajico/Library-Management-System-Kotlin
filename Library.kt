@@ -1,5 +1,12 @@
+import java.util.Scanner
+
 // Book class represents a book in the library
-data class Book(val title: String, val author: String, val isbn: String, var available: Boolean = true)
+data class Book(
+    val title: String, 
+    val author: String, 
+    val isbn: String, 
+    var available: Boolean = true
+)
 
 // Member class represents a member of the library
 open class Member(val name: String, val memberId: String) {
@@ -55,6 +62,7 @@ class Librarian(name: String, memberId: String) : Member(name, memberId) {
     }
 }
 
+
 // Library class represents the collection of books and members
 class Library {
 
@@ -91,7 +99,46 @@ class Library {
     }
 }
 
+//Main Dashboard 
+fun MainDashBoard(): Int {
+    val scanner = Scanner(System.`in`)
+    var choice : Int? = null
+    while(true){
+
+        println("+-------------------------------+")
+        println("|   LIBRARY MANAGEMENT SYSTEM   |")
+        println("+-------------------------------+")
+        println("|  (1) Library                  |")
+        println("|  (2) Reader of the Week       |")
+        println("|  (3) Exit                     |")
+        println("+-------------------------------+")
+        print("Select(1-3): ")
+
+        try
+        {
+            choice = scanner.nextInt()
+            if(choice !in 1..3){
+                println("Invalid choice. Please select a number between 1 and 3.")
+            }
+            else{
+                break
+            }
+        }
+        catch(e: Exception){
+            println("Error: Invalid input. Please enter a valid number.")
+        }
+    }
+    return choice
+}
+
+
+class LibraryOperation {
+    
+}
+
 fun main() {
+    println("Choice: " + MainDashBoard())
+
     // Create the library and librarian
     val library = Library()
     val librarian = Librarian("Alice", "L123")
