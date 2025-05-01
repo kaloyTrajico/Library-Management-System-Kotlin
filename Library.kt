@@ -1,4 +1,5 @@
 import java.util.Scanner
+import kotlin.system.exitProcess
 
 // Book class represents a book in the library
 data class Book(
@@ -132,6 +133,7 @@ fun MainDashBoard(): Int {
 }
 
 
+
 class LogInSignUp{
     var readerUsername : String? = null
 
@@ -228,36 +230,177 @@ class LogInSignUp{
         println("+-------------------------------------------------+")
         println("|                  Log In                         |")
         println("+-------------------------------------------------+")
-        println("Username: ")
+        print("Username: ")
         username = scanner.next()
-        println("")
+        print("Password: ")
+        password = scanner.next()
+
+        println(username + " " + password)
+
+        val user = userReader()
+        user.ReaderPage(username, password)
     }
 
     fun logInLibrarian(){
         println("Log In Librarian")
+        val scanner = Scanner(System.`in`)
+        var username : String? = null
+        var password : String? = null
+
+        println("+-------------------------------------------------+")
+        println("|                  Log In                         |")
+        println("+-------------------------------------------------+")
+        print("Username: ")
+        username = scanner.next()
+        print("Password: ")
+        password = scanner.next()
+
+        println(username + " " + password)
     }
 
     fun signUpReader(){
         println("Sign Up Reader")
+        val scanner = Scanner(System.`in`)
+        var username : String? = null
+        var password : String? = null
+
+        println("+-------------------------------------------------+")
+        println("|                  Sign Up                        |")
+        println("+-------------------------------------------------+")
+        println("| Note: Credentials are case sensitive so you must|")
+        println("| remember yours.                                 |")
+        println("+-------------------------------------------------+")
+        print("Set Username: ")
+        username = scanner.next()
+        print("Set Password: ")
+        password = scanner.next()
+
+        println(username + " " + password)
     }
 
     fun signUpLibrarian(){
         println("Sign Up Librarian")
+        println("Sign Up Reader")
+        val scanner = Scanner(System.`in`)
+        var username : String? = null
+        var password : String? = null
+
+        println("+-------------------------------------------------+")
+        println("|                  Sign Up                        |")
+        println("+-------------------------------------------------+")
+        println("| Note: Credentials are case sensitive so you must|")
+        println("| remember yours.                                 |")
+        println("+-------------------------------------------------+")
+        print("Set Username: ")
+        username = scanner.next()
+        print("Set Password: ")
+        password = scanner.next()
+
+        println(username + " " + password)
     }
 }
 
-class LibraryOperation {
+// This class need to be private
+class userReader(){
+    fun ReaderPage(username: String, pass: String){
+        // var currentUser = username
 
-    fun LibraryDashBoard(){
-        println("+-------------------------------+")
-        println("|           LIBRARY             |")
-        println("+-------------------------------+")
-        println("|  (1) Library                  |")
-        println("|  (2) Reader of the Week       |")
-        println("|  (3) Exit                     |")
-        println("+-------------------------------+")
-        print("Select(1-3): ")
+        println("+---------------------------------------+")
+        println("WELCOME " + username + "!")
+        println("+---------------------------------------+")
+
+
+        val scanner = Scanner(System.`in`)
+        var choice : Int? = null
+
+        while(true){
+            println("+---------------------------------------+")
+            println("|        LIBRARY MANAGEMENT SYSTEM      |")
+            println("+---------------------------------------+")
+            println("|  (1) View Library                     |")
+            println("|  (2) Publish a Book                   |")
+            println("|  (3) Borrow a Book                    |")
+            println("|  (4) Return a Book                    |")
+            println("|  (5) Rate a Book                      |")
+            println("|  (6) View Borrowed Books              |")
+            println("|  (7) View Reading History             |")
+            println("|  (8) Add to Favorites                 |")
+            println("| (9) Leave a Review                   |")
+            println("| (10) Update Account Info              |")
+            println("| (11) Exit                             |")
+            println("+---------------------------------------+")
+            print("Select(1-11): ")
+
+            try
+            {
+                choice = scanner.nextInt()
+                if(choice !in 1..11){
+                    println("Invalid choice. Please select a number between 1 and 11.")
+                }
+                else{
+                    break
+                }
+            }
+            catch(e: Exception){
+                println("Error: Invalid input. Please enter a valid number.")
+            }
+        }
+        
+        // TODO
+        when(choice){
+            1 -> {
+                println("Library")
+            }
+            2 -> {
+                println("Publish")
+            }
+            3 -> {
+                println("Borrow")
+            }
+            4 -> {
+                println("Return")
+            }
+            5 -> {
+                println("Rate")
+            }
+            6 -> {
+                println("Exit")
+                ExitPage()
+            }
+        }
     }
+
+    fun publishBook(){
+
+    }
+
+    fun borrowBook(){
+
+    }
+
+    fun returnBook(){
+
+    }
+
+    fun rateBook(){
+        
+    }
+}
+
+
+fun ExitPage(){
+    println("+---------------------------------------------------+")
+    println("|   THANK YOU FOR USING LIBRARY MANAGEMENT SYSTEM!  |")
+    println("+---------------------------------------------------+")
+    println("|   DEVELOPERS:   IRWEN FRONDA                      |")
+    println("|                 AXEL AARON ARCELETA               |")
+    println("|                 JOHN CARLO TRAJICO                |")
+    println("|                                                   |")
+    println("|   Year&Section: BSCS-2A                           |")
+    println("|                                                   |")
+    println("|   Project Details are uploaded in README.md file  |")
+    println("+---------------------------------------------------+")
+    exitProcess(0)
 }
 
 fun main() {
