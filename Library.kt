@@ -300,6 +300,7 @@ class LogInSignUp{
     }
 }
 
+// TODO
 // This class need to be private
 class userReader(){
     fun ReaderPage(username: String, pass: String){
@@ -325,9 +326,9 @@ class userReader(){
             println("|  (6) View Borrowed Books              |")
             println("|  (7) View Reading History             |")
             println("|  (8) Add to Favorites                 |")
-            println("| (9) Leave a Review                   |")
+            println("| (9) Leave a Review                    |")
             println("| (10) Update Account Info              |")
-            println("| (11) Exit                             |")
+            println("| (11) Log Out                          |")
             println("+---------------------------------------+")
             print("Select(1-11): ")
 
@@ -387,6 +388,28 @@ class userReader(){
     }
 }
 
+// TO DO
+// This class need to be private
+class userLibrarian(){
+    fun librarianControlPanel(){
+        println("+-------------------------------------------+")
+        println("|          LIBRARIAN CONTROL PANEL          |")
+        println("+-------------------------------------------+")
+        println("|  (1) Add a Book                           |")
+        println("|  (2) Remove a Book                        |")
+        println("|  (3) Update Book Info                     |")
+        println("|  (4) View All Books                       |")
+        println("|  (5) View Borrowed Books                  |")
+        println("|  (6) View Overdue Books                   |")
+        println("|  (7) Manage Reader Accounts               |")
+        println("|  (8) View Ratings and Reviews             |")
+        println("|  (9) Generate Library Reports             |")
+        println("| (10) Add/Remove Librarian                 |")
+        println("| (11) Log Out                              |")
+        println("+-------------------------------------------+")
+        print("Select: 1-11: ")
+    }
+}
 
 fun ExitPage(){
     println("+---------------------------------------------------+")
