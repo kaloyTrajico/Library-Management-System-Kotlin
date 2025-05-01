@@ -132,12 +132,140 @@ fun MainDashBoard(): Int {
 }
 
 
+class LogInSignUp{
+    var readerUsername : String? = null
+
+    fun InitUser() {
+        val scanner = Scanner(System.`in`)
+        var choice : Int? = null
+
+        
+        while(true){
+            println("+-------------------------------------------------+")
+            println("|           LIBRARY MANAGEMENT SYSTEM             |")
+            println("+-------------------------------------------------+")
+            println("|           (1) Log In                            |")
+            println("|           (2) Sign Up                           |")
+            println("|           (3) Exit                              |")
+            println("+-------------------------------------------------+")
+            print("Select(1-3): ")
+            try
+            {
+                choice = scanner.nextInt()
+                if(choice !in 1..3){
+                    println("Invalid choice. Please select a number between 1 and 3.")
+                }
+                else{
+                    break
+                }
+            }
+            catch(e: Exception){
+                println("Error: Invalid input. Please enter a valid number.")
+            }
+        }
+        
+        when(choice){
+            1 -> {
+                println("Log In")
+                val userType = readerOrLibrarian()
+                if(userType == 1){
+                    logInReader() 
+                }
+                else if(userType == 2){
+                    logInLibrarian()
+                }
+                else println("You must specify what type of user you are")
+            }
+            2 -> {
+                println("Sign Up")
+                val userType = readerOrLibrarian()
+                if(userType == 1){
+                    signUpReader()
+                    
+                }
+                else if(userType == 2){
+                    signUpLibrarian()
+                
+                }
+                else println("You must specify what type of user you are")
+            }
+            3 -> println("Exit...")
+        }
+
+    }
+
+    fun readerOrLibrarian(): Int {
+        val scanner = Scanner(System.`in`)
+        var choice : Int? = null
+
+        while(true){
+            println("+-------------------------------------------------+")
+            println("|                  TYPE OF USER                   |")
+            println("+-------------------------------------------------+")
+            println("|                 (1) Reader                      |")
+            println("|                 (2) Librarian                   |")
+            println("|                 (3) Back                        |")
+            println("+-------------------------------------------------+")
+            print("Select(1-3): ")
+            try
+            {
+                choice = scanner.nextInt()
+                if(choice !in 1..3) println("Invalid choice. Please select a number between 1 and 3.")
+                else return choice
+            }
+            catch(e: Exception){
+                println("Error: Invalid input. Please enter a valid number.")
+            }
+        }
+    }
+
+    fun logInReader(){
+        println("Log In Reader")
+        val scanner = Scanner(System.`in`)
+        var username : String? = null
+        var password : String? = null
+
+        println("+-------------------------------------------------+")
+        println("|                  Log In                         |")
+        println("+-------------------------------------------------+")
+        println("Username: ")
+        username = scanner.next()
+        println("")
+    }
+
+    fun logInLibrarian(){
+        println("Log In Librarian")
+    }
+
+    fun signUpReader(){
+        println("Sign Up Reader")
+    }
+
+    fun signUpLibrarian(){
+        println("Sign Up Librarian")
+    }
+}
+
 class LibraryOperation {
-    
+
+    fun LibraryDashBoard(){
+        println("+-------------------------------+")
+        println("|           LIBRARY             |")
+        println("+-------------------------------+")
+        println("|  (1) Library                  |")
+        println("|  (2) Reader of the Week       |")
+        println("|  (3) Exit                     |")
+        println("+-------------------------------+")
+        print("Select(1-3): ")
+    }
 }
 
 fun main() {
-    println("Choice: " + MainDashBoard())
+    val user = LogInSignUp()
+    user.InitUser()
+
+    // println("Choice: " + MainDashBoard())
+
 
     // Create the library and librarian
     val library = Library()
