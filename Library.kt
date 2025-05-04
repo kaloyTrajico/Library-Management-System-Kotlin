@@ -91,46 +91,79 @@ class Library {
         }
     }
 
-    fun addMember(member: Member) {
-        members.add(member)
+    // fun addMember(member: Member) {
+    //     members.add(member)
+    // }
+
+    // fun removeMember(member: Member) {
+    //     members.remove(member)
+    // }
+
+    //Main Dashboard 
+    fun MainDashBoard(): Int {
+        val scanner = Scanner(System.`in`)
+        var choice : Int? = null
+        while(true){
+
+            println("+-------------------------------+")
+            println("|   LIBRARY MANAGEMENT SYSTEM   |")
+            println("+-------------------------------+")
+            println("|  (1) Library                  |")
+            println("|  (2) Reader of the Week       |")
+            println("|  (3) Exit                     |")
+            println("+-------------------------------+")
+            print("Select(1-3): ")
+
+            try
+            {
+                choice = scanner.nextInt()
+                if(choice !in 1..3){
+                    println("Invalid choice. Please select a number between 1 and 3.")
+                }
+                else{
+                    break
+                }
+            }
+            catch(e: Exception){
+                println("Error: Invalid input. Please enter a valid number.")
+            }
+        }
+        return choice
     }
 
-    fun removeMember(member: Member) {
-        members.remove(member)
+    fun LibraryMethods(){
+        val scanner = Scanner(System.`in`)
+        var choice : Int? = null
+        while(true){
+
+            println("+-------------------------------+")
+            println("|   LIBRARY MANAGEMENT SYSTEM   |")
+            println("+-------------------------------+")
+            println("|  (1) Display all books        |")
+            println("|  (2) Read a book              |")
+            println("|  (2) Search a book            |")
+            println("|  (3) Back                     |")
+            println("+-------------------------------+")
+            print("Select(1-3): ")
+
+            try
+            {
+                choice = scanner.nextInt()
+                if(choice !in 1..3){
+                    println("Invalid choice. Please select a number between 1 and 3.")
+                }
+                else{
+                    break
+                }
+            }
+            catch(e: Exception){
+                println("Error: Invalid input. Please enter a valid number.")
+            }
+        }
     }
 }
 
-//Main Dashboard 
-fun MainDashBoard(): Int {
-    val scanner = Scanner(System.`in`)
-    var choice : Int? = null
-    while(true){
 
-        println("+-------------------------------+")
-        println("|   LIBRARY MANAGEMENT SYSTEM   |")
-        println("+-------------------------------+")
-        println("|  (1) Library                  |")
-        println("|  (2) Reader of the Week       |")
-        println("|  (3) Exit                     |")
-        println("+-------------------------------+")
-        print("Select(1-3): ")
-
-        try
-        {
-            choice = scanner.nextInt()
-            if(choice !in 1..3){
-                println("Invalid choice. Please select a number between 1 and 3.")
-            }
-            else{
-                break
-            }
-        }
-        catch(e: Exception){
-            println("Error: Invalid input. Please enter a valid number.")
-        }
-    }
-    return choice
-}
 
 
 
@@ -326,9 +359,9 @@ class userReader(){
             println("|  (6) View Borrowed Books              |")
             println("|  (7) View Reading History             |")
             println("|  (8) Add to Favorites                 |")
-            println("| (9) Leave a Review                    |")
-            println("| (10) Update Account Info              |")
-            println("| (11) Log Out                          |")
+            println("|  (9) Leave a Review                   |")
+            println("|  (10) Manage your Account             |")
+            println("|  (11) Log Out                         |")
             println("+---------------------------------------+")
             print("Select(1-11): ")
 
@@ -351,9 +384,13 @@ class userReader(){
         when(choice){
             1 -> {
                 println("Library")
+                val library = Library()
+                library.MainDashBoard()
             }
             2 -> {
                 println("Publish")
+                val reader = userReader()
+                reader.publishBook()
             }
             3 -> {
                 println("Borrow")
@@ -368,11 +405,37 @@ class userReader(){
                 println("Exit")
                 ExitPage()
             }
+
         }
     }
 
     fun publishBook(){
+        val scanner = Scanner(System.`in`)
+        var bookName: String = ""
+        var isbn: String = ""
+        println("+-------------------------------------------+")
+        println("|          LIBRARIAN CONTROL PANEL          |")
+        println("+-------------------------------------------+")
+        println("| Publish a Book                            |")
+        println("+-------------------------------------------+")
+        println()
 
+        print("Enter a book name: ")
+        bookName = scanner.nextLine()
+        while(true){
+            try{
+                print("Enter isbn number (5-digit): ")
+                isbn = scanner.next()
+                if(isbn.length != 5){
+                    println("Invalid isbn...")
+                }
+                else {break}
+            }
+            catch (e: Exception){
+                println("Invalid Input...")
+            }
+        }
+        println("Your book \"$bookName\" has been successfully added to the book approval list of librarians.")
     }
 
     fun borrowBook(){
@@ -401,13 +464,12 @@ class userLibrarian(){
         println("|  (4) View All Books                       |")
         println("|  (5) View Borrowed Books                  |")
         println("|  (6) View Overdue Books                   |")
-        println("|  (7) Manage Reader Accounts               |")
+        println("|  (7) Manage Your Account                  |")
         println("|  (8) View Ratings and Reviews             |")
         println("|  (9) Generate Library Reports             |")
-        println("| (10) Add/Remove Librarian                 |")
-        println("| (11) Log Out                              |")
+        println("| (10) Log Out                              |")
         println("+-------------------------------------------+")
-        print("Select: 1-11: ")
+        print("Select: 1-10: ")
     }
 }
 
@@ -430,38 +492,36 @@ fun main() {
     val user = LogInSignUp()
     user.InitUser()
 
-    // println("Choice: " + MainDashBoard())
+    // // val library = Library()
+    // val librarian = Librarian("Alice", "L123")
+    // // library.MainDashBoard()
+    
 
+    // // Create some books
+    // val book1 = Book("Kotlin Programming", "John Doe", "12345")
+    // val book2 = Book("Advanced Kotlin", "Jane Smith", "67890")
 
-    // Create the library and librarian
-    val library = Library()
-    val librarian = Librarian("Alice", "L123")
+    // // Add books to the library
+    // librarian.addBook(library, book1)
+    // librarian.addBook(library, book2)
 
-    // Create some books
-    val book1 = Book("Kotlin Programming", "John Doe", "12345")
-    val book2 = Book("Advanced Kotlin", "Jane Smith", "67890")
+    // // Create some members
+    // val member1 = Member("Bob", "M001")
+    // val member2 = Member("Charlie", "M002")
 
-    // Add books to the library
-    librarian.addBook(library, book1)
-    librarian.addBook(library, book2)
+    // // Add members to the library
+    // library.addMember(member1)
+    // library.addMember(member2)
 
-    // Create some members
-    val member1 = Member("Bob", "M001")
-    val member2 = Member("Charlie", "M002")
+    // // Member borrows a book
+    // member1.borrowBook(book1)
 
-    // Add members to the library
-    library.addMember(member1)
-    library.addMember(member2)
+    // // Member tries to borrow the same book again (should show unavailable)
+    // member2.borrowBook(book1)
 
-    // Member borrows a book
-    member1.borrowBook(book1)
+    // // Member returns a book
+    // member1.returnBook(book1)
 
-    // Member tries to borrow the same book again (should show unavailable)
-    member2.borrowBook(book1)
-
-    // Member returns a book
-    member1.returnBook(book1)
-
-    // Search for books by title
-    librarian.searchBook(library, "Kotlin")
+    // // Search for books by title
+    // librarian.searchBook(library, "Kotlin")
 }
