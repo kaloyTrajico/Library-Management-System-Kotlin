@@ -1,5 +1,6 @@
 import java.util.Scanner
 import kotlin.system.exitProcess
+import java.io.File
 
 // Book class represents a book in the library
 data class Book(
@@ -67,7 +68,7 @@ class Librarian(name: String, memberId: String) : Member(name, memberId) {
 // Library class represents the collection of books and members
 class Library {
 
-    private val books = mutableListOf<Book>()
+    private val books = loadBooksFromCSV("books.csv").toMutableList()
     private val members = mutableListOf<Member>()
 
     fun addBook(book: Book) {
@@ -91,16 +92,9 @@ class Library {
         }
     }
 
-    // fun addMember(member: Member) {
-    //     members.add(member)
-    // }
-
-    // fun removeMember(member: Member) {
-    //     members.remove(member)
-    // }
-
+    
     //Main Dashboard 
-    fun MainDashBoard(): Int {
+    fun MainDashBoard() {
         val scanner = Scanner(System.`in`)
         var choice : Int? = null
         while(true){
@@ -128,7 +122,11 @@ class Library {
                 println("Error: Invalid input. Please enter a valid number.")
             }
         }
-        return choice
+        when(choice){
+            1 -> {
+                LibraryMethods()
+            }
+        }
     }
 
     fun LibraryMethods(){
@@ -141,8 +139,8 @@ class Library {
             println("+-------------------------------+")
             println("|  (1) Display all books        |")
             println("|  (2) Read a book              |")
-            println("|  (2) Search a book            |")
-            println("|  (3) Back                     |")
+            println("|  (3) Search a book            |")
+            println("|  (4) Back                     |")
             println("+-------------------------------+")
             print("Select(1-3): ")
 
@@ -160,6 +158,65 @@ class Library {
                 println("Error: Invalid input. Please enter a valid number.")
             }
         }
+
+        when(choice){
+            1 -> {
+                displayBooks()
+            }
+            //TODO
+            2 -> {
+                
+            }
+            3 ->{
+
+            }
+        }
+    }
+
+    //TODO
+    fun readerOfTheWeek(){
+
+    }
+
+    fun displayBooks() {
+        println("+-----------------------------------------------------------+")
+        println("|              LIBRARY MANAGEMENT SYSTEM                    |")
+        println("+-----------------------------------------------------------+")
+        println("| Title                  | Author         | ISBN     | Available |")
+        println("+-----------------------------------------------------------+")
+
+        for (book in books) {
+            println(
+                "| ${book.title.padEnd(22)} | ${book.author.padEnd(14)} | ${book.isbn.padEnd(8)} | ${book.available.toString().padEnd(9)} |"
+            )
+        }
+
+        println("+-----------------------------------------------------------+")
+
+        println("Press Enter to continue...")
+        readLine()
+        return
+    }
+    
+    fun loadBooksFromCSV(filePath: String): List<Book> {
+        val books = mutableListOf<Book>()
+        try {
+            File(filePath).useLines { lines ->
+                lines.drop(1).forEach { line -> // Skip header
+                    val parts = line.split(",")
+                    if (parts.size >= 4) {
+                        val title = parts[0]
+                        val author = parts[1]
+                        val isbn = parts[2]
+                        val available = parts[3].toBooleanStrictOrNull() ?: true
+                        books.add(Book(title, author, isbn, available))
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            println("Error reading CSV: ${e.message}")
+        }
+        return books
     }
 }
 
@@ -270,8 +327,8 @@ class LogInSignUp{
 
         println(username + " " + password)
 
-        val user = userReader()
-        user.ReaderPage(username, password)
+        var user = userReader(username, password)
+        user.readerPage()
     }
 
     fun logInLibrarian(){
@@ -335,12 +392,21 @@ class LogInSignUp{
 
 // TODO
 // This class need to be private
-class userReader(){
-    fun ReaderPage(username: String, pass: String){
+// You need a constructor
+class userReader(val username: String, val password: String){
+
+    init{
+        println("+---------------------------------------+")
+        println("|       LIBRARY MANAGEMENT SYSTEM       |")
+        println("+---------------------------------------+")
+        println("Initialized...")
+    }
+
+    fun readerPage(){
         // var currentUser = username
 
         println("+---------------------------------------+")
-        println("WELCOME " + username + "!")
+        println("WELCOME  $username!")
         println("+---------------------------------------+")
 
 
@@ -349,7 +415,7 @@ class userReader(){
 
         while(true){
             println("+---------------------------------------+")
-            println("|        LIBRARY MANAGEMENT SYSTEM      |")
+            println("|       LIBRARY MANAGEMENT SYSTEM       |")
             println("+---------------------------------------+")
             println("|  (1) View Library                     |")
             println("|  (2) Publish a Book                   |")
@@ -389,8 +455,7 @@ class userReader(){
             }
             2 -> {
                 println("Publish")
-                val reader = userReader()
-                reader.publishBook()
+                publishBook()
             }
             3 -> {
                 println("Borrow")
@@ -439,7 +504,7 @@ class userReader(){
     }
 
     fun borrowBook(){
-
+        
     }
 
     fun returnBook(){
@@ -487,6 +552,10 @@ fun ExitPage(){
     println("+---------------------------------------------------+")
     exitProcess(0)
 }
+
+
+
+
 
 fun main() {
     val user = LogInSignUp()
