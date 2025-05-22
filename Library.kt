@@ -10,79 +10,29 @@ data class Book(
     var available: Boolean = true
 )
 
-// Member class represents a member of the library
-open class Member(val name: String, val memberId: String) {
-    private val borrowedBooks = mutableListOf<Book>()
+//Users  are the readers
+data class Users(
+    val username: String,
+    val pass: String,
+    var numberOfBooksRead: Int
+)
 
-    fun borrowBook(book: Book): Boolean {
-        if (book.available) {
-            book.available = false
-            borrowedBooks.add(book)
-            println("$name borrowed '${book.title}'")
-            return true
-        }
-        println("Sorry, '${book.title}' is currently unavailable.")
-        return false
-    }
-
-    fun returnBook(book: Book): Boolean {
-        if (borrowedBooks.contains(book)) {
-            book.available = true
-            borrowedBooks.remove(book)
-            println("$name returned '${book.title}'")
-            return true
-        }
-        println("Error: You don't have '${book.title}' borrowed.")
-        return false
-    }
-
-    fun viewBorrowedBooks() {
-        if (borrowedBooks.isEmpty()) {
-            println("$name has no borrowed books.")
-        } else {
-            println("$name's borrowed books:")
-            borrowedBooks.forEach { println("- ${it.title} by ${it.author}") }
-        }
-    }
-}
-
-// Librarian class represents the librarian who manages the library
-class Librarian(name: String, memberId: String) : Member(name, memberId) {
-
-    fun addBook(library: Library, book: Book) {
-        library.addBook(book)
-        println("'${book.title}' by ${book.author} has been added to the library.")
-    }
-
-    fun removeBook(library: Library, book: Book) {
-        library.removeBook(book)
-        println("'${book.title}' by ${book.author} has been removed from the library.")
-    }
-
-    fun searchBook(library: Library, searchQuery: String): List<Book> {
-        return library.searchBook(searchQuery)
-    }
-}
+//Librarians
+data class Librarians(
+    val username: String,
+    val pass: String
+)
 
 
 // Library class represents the collection of books and members
 class Library {
 
     private val books = loadBooksFromCSV("books.csv").toMutableList()
-    private val members = mutableListOf<Member>()
-
-    fun addBook(book: Book) {
-        books.add(book)
-    }
-
-    fun removeBook(book: Book) {
-        books.remove(book)
-    }
 
     fun searchBook(query: String): List<Book> {
-        val results = books.filter { it.title.contains(query, ignoreCase = true) ||
-                                      it.author.contains(query, ignoreCase = true) ||
-                                      it.isbn.contains(query, ignoreCase = true) }
+        val results = books.filter { it.title.equals(query, ignoreCase = true) ||
+                                      it.author.equals(query, ignoreCase = true) ||
+                                      it.isbn.equals(query, ignoreCase = true) }
         return if (results.isEmpty()) {
             println("No books found for '$query'")
             emptyList()
@@ -168,7 +118,11 @@ class Library {
                 
             }
             3 ->{
-
+                // var bookName : String 
+                print("Enter book title: ")
+                var bookName = scanner.next()
+                println("Searching...")
+                searchBook(bookName)
             }
         }
     }
@@ -179,20 +133,17 @@ class Library {
     }
 
     fun displayBooks() {
-        println("+-----------------------------------------------------------+")
-        println("|              LIBRARY MANAGEMENT SYSTEM                    |")
-        println("+-----------------------------------------------------------+")
+        println("+----------------------------------------------------------------+")
+        println("|              LIBRARY MANAGEMENT SYSTEM                         |")
+        println("+----------------------------------------------------------------+")
         println("| Title                  | Author         | ISBN     | Available |")
-        println("+-----------------------------------------------------------+")
-
+        println("+----------------------------------------------------------------+")
         for (book in books) {
             println(
                 "| ${book.title.padEnd(22)} | ${book.author.padEnd(14)} | ${book.isbn.padEnd(8)} | ${book.available.toString().padEnd(9)} |"
             )
         }
-
-        println("+-----------------------------------------------------------+")
-
+        println("+----------------------------------------------------------------+")
         println("Press Enter to continue...")
         readLine()
         return
@@ -222,10 +173,9 @@ class Library {
 
 
 
-
-
 class LogInSignUp{
-    var readerUsername : String? = null
+    var retrievedUsers = retrieveReaders().toMutableList()
+    var retrievedLibrariansUsers = retrievedLibrarians().toMutableList()
 
     fun InitUser() {
         val scanner = Scanner(System.`in`)
@@ -283,7 +233,6 @@ class LogInSignUp{
             }
             3 -> println("Exit...")
         }
-
     }
 
     fun readerOrLibrarian(): Int {
@@ -314,66 +263,81 @@ class LogInSignUp{
     fun logInReader(){
         println("Log In Reader")
         val scanner = Scanner(System.`in`)
-        var username : String? = null
-        var password : String? = null
-
         println("+-------------------------------------------------+")
         println("|                  Log In                         |")
         println("+-------------------------------------------------+")
         print("Username: ")
-        username = scanner.next()
+        var username = scanner.nextLine()
         print("Password: ")
-        password = scanner.next()
+        var password = scanner.nextLine()
 
         println(username + " " + password)
+        if (isLogInReader(username, password) == true){
+            var user = userReader(username, password)
+            user.readerPage()
+        }
+        else{
+            println("No existing account...")
+            println("Sign up first..")
+            return
+        } 
+    }
+
+
+    fun logInLibrarian(){
+        println("Log In Librarian")
+        val scanner = Scanner(System.`in`)
+        println("+-------------------------------------------------+")
+        println("|                  Log In                         |")
+        println("+-------------------------------------------------+")
+        print("Username: ")
+        var username = scanner.nextLine()
+        print("Password: ")
+        var password = scanner.nextLine()
+
+        println(username + " " + password)
+        if (isLogInLibrarian(username, password) == true){
+            var user = userLibrarian(username, password)
+            user.librarianPage()
+        }
+        else{
+            println("No existing account...")
+            println("Sign up first..")
+            return
+        }
+    }
+
+    fun signUpReader(){
+        println("Sign Up Reader")
+        val scanner = Scanner(System.`in`)  
+
+        println("+-------------------------------------------------+")
+        println("|                  Sign Up                        |")
+        println("+-------------------------------------------------+")
+        println("| Note: Credentials are case sensitive so you must|")
+        println("| remember yours.                                 |")
+        println("+-------------------------------------------------+")
+        print("Set Username: ")
+        var username = scanner.nextLine()
+
+        print("Set Password: ")
+        var password = scanner.nextLine()
+
+        if (isLogInReader(username, password)) {
+            println("Username already exists! Try a different one.")
+            return
+        }   
+
+        saveSignUpReaderAcc(username, password)
+        println("Account created successfully for $username.")
 
         var user = userReader(username, password)
         user.readerPage()
     }
 
-    fun logInLibrarian(){
-        println("Log In Librarian")
-        val scanner = Scanner(System.`in`)
-        var username : String? = null
-        var password : String? = null
-
-        println("+-------------------------------------------------+")
-        println("|                  Log In                         |")
-        println("+-------------------------------------------------+")
-        print("Username: ")
-        username = scanner.next()
-        print("Password: ")
-        password = scanner.next()
-
-        println(username + " " + password)
-    }
-
-    fun signUpReader(){
-        println("Sign Up Reader")
-        val scanner = Scanner(System.`in`)
-        var username : String? = null
-        var password : String? = null
-
-        println("+-------------------------------------------------+")
-        println("|                  Sign Up                        |")
-        println("+-------------------------------------------------+")
-        println("| Note: Credentials are case sensitive so you must|")
-        println("| remember yours.                                 |")
-        println("+-------------------------------------------------+")
-        print("Set Username: ")
-        username = scanner.next()
-        print("Set Password: ")
-        password = scanner.next()
-
-        println(username + " " + password)
-    }
-
     fun signUpLibrarian(){
         println("Sign Up Librarian")
-        println("Sign Up Reader")
         val scanner = Scanner(System.`in`)
-        var username : String? = null
-        var password : String? = null
 
         println("+-------------------------------------------------+")
         println("|                  Sign Up                        |")
@@ -382,18 +346,118 @@ class LogInSignUp{
         println("| remember yours.                                 |")
         println("+-------------------------------------------------+")
         print("Set Username: ")
-        username = scanner.next()
-        print("Set Password: ")
-        password = scanner.next()
+        var username = scanner.nextLine()
 
-        println(username + " " + password)
+        print("Set Password: ")
+        var password = scanner.nextLine()
+
+        saveSignUpLibrarianAcc(username, password)
+        println("Account created successfully for $username.")
+
+        var user = userLibrarian(username, password)
+        user.librarianPage()
     }
+
+    fun retrieveReaders(): List<Users>{
+        val users = mutableListOf<Users>()
+        try {
+            File("user.csv").useLines { lines ->
+                lines.drop(1).forEach { line -> // Skip header
+                    val parts = line.split(",")
+                    if (parts.size >= 3) {
+                        val username = parts[0]
+                        val pass = parts[1]
+                        val numberOfBooksRead = parts[2].toIntOrNull() ?: 0 
+                        users.add(Users(username, pass, numberOfBooksRead))
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            println("Error reading CSV: ${e.message}")
+        }
+        return users
+    }
+
+    fun retrievedLibrarians(): List<Librarians>{
+        val users = mutableListOf<Librarians>()
+        try {
+            File("librarian.csv").useLines { lines ->
+                lines.drop(1).forEach { line -> // Skip header
+                    val parts = line.split(",")
+                    if (parts.size >= 2) {
+                        val username = parts[0]
+                        val pass = parts[1]
+                        users.add(Librarians(username, pass))
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            println("Error reading CSV: ${e.message}")
+        }
+        return users
+    }
+
+    fun isLogInReader(username : String, password : String): Boolean {
+        return retrievedUsers.any { it.username == username && it.pass == password }
+    }
+
+    fun isLogInLibrarian(username : String, password : String): Boolean {
+        return retrievedLibrariansUsers.any { it.username == username && it.pass == password }
+    }
+
+    fun saveSignUpReaderAcc(username: String, password: String) {
+        val file = File("user.csv")
+        val newLine = "$username,$password,0" // numberOfBooksRead starts at 0
+
+        try {
+            // If the file doesn't exist, create it and write the header first
+            if (!file.exists()) {
+                file.writeText("readerName,password,numberOfBooksRead\n")
+            }
+
+            // Ensure the file ends with a newline before appending
+            if (!file.readText().endsWith("\n")) {
+                file.appendText("\n")
+            }   
+
+            // Append the new user line
+            file.appendText("$newLine\n")
+            println("User account for '$username' created successfully.")
+        } catch (e: Exception) {
+            println("Error saving account: ${e.message}")
+        }
+        return
+    }
+
+    fun saveSignUpLibrarianAcc(username: String, password: String) {
+        val file = File("librarian.csv")
+        val newLine = "$username,$password" 
+
+        try {
+            // If the file doesn't exist, create it and write the header first
+            if (!file.exists()) {
+                file.writeText("readerName,password\n")
+            }
+
+            // Ensure the file ends with a newline before appending
+            if (!file.readText().endsWith("\n")) {
+                file.appendText("\n")
+            }   
+
+            // Append the new user line
+            file.appendText("$newLine\n")
+            println("User account for '$username' created successfully.")
+        } catch (e: Exception) {
+            println("Error saving account: ${e.message}")
+        }
+    }
+
 }
 
 // TODO
 // This class need to be private
-// You need a constructor
-class userReader(val username: String, val password: String){
+// You need to have save function to update the user.csv
+class userReader(var username: String, var password: String){
 
     init{
         println("+---------------------------------------+")
@@ -403,8 +467,6 @@ class userReader(val username: String, val password: String){
     }
 
     fun readerPage(){
-        // var currentUser = username
-
         println("+---------------------------------------+")
         println("WELCOME  $username!")
         println("+---------------------------------------+")
@@ -467,19 +529,33 @@ class userReader(val username: String, val password: String){
                 println("Rate")
             }
             6 -> {
-                println("Exit")
-                ExitPage()
+                //TODO
             }
-
+            7 -> {
+                //TODO
+            }
+            8 -> {
+                //TODO
+            }
+            9 -> {
+                //TODO
+            }
+            10 -> {
+                //TODO
+            }
+            11 -> {
+                //TODO
+            }
         }
     }
 
+    //TODO
     fun publishBook(){
         val scanner = Scanner(System.`in`)
         var bookName: String = ""
         var isbn: String = ""
         println("+-------------------------------------------+")
-        println("|          LIBRARIAN CONTROL PANEL          |")
+        println("|           PUBLISH CONTROL PANEL           |")
         println("+-------------------------------------------+")
         println("| Publish a Book                            |")
         println("+-------------------------------------------+")
@@ -516,25 +592,83 @@ class userReader(val username: String, val password: String){
     }
 }
 
-// TO DO
-// This class need to be private
-class userLibrarian(){
-    fun librarianControlPanel(){
-        println("+-------------------------------------------+")
-        println("|          LIBRARIAN CONTROL PANEL          |")
-        println("+-------------------------------------------+")
-        println("|  (1) Add a Book                           |")
-        println("|  (2) Remove a Book                        |")
-        println("|  (3) Update Book Info                     |")
-        println("|  (4) View All Books                       |")
-        println("|  (5) View Borrowed Books                  |")
-        println("|  (6) View Overdue Books                   |")
-        println("|  (7) Manage Your Account                  |")
-        println("|  (8) View Ratings and Reviews             |")
-        println("|  (9) Generate Library Reports             |")
-        println("| (10) Log Out                              |")
-        println("+-------------------------------------------+")
-        print("Select: 1-10: ")
+// TODO
+// You need to have save function to update the librarian.csv
+class userLibrarian(var username: String, var pass: String){
+    fun librarianPage(){
+        println("+---------------------------------------+")
+        println("WELCOME  $username!")
+        println("+---------------------------------------+")
+
+        val scanner = Scanner(System.`in`)
+        var choice : Int? = null
+
+        while(true){
+            println("+-------------------------------------------+")
+            println("|          LIBRARIAN CONTROL PANEL          |")
+            println("+-------------------------------------------+")
+            println("|  (1) Add a Book                           |")
+            println("|  (2) Remove a Book                        |")
+            println("|  (3) Update Book Info                     |")
+            println("|  (4) View All Books                       |")
+            println("|  (5) View Borrowed Books                  |")
+            println("|  (6) View Overdue Books                   |")
+            println("|  (7) Manage Your Account                  |")
+            println("|  (8) View Ratings and Reviews             |")
+            println("|  (9) Generate Library Reports             |")
+            println("| (10) Log Out                              |")
+            println("+-------------------------------------------+")
+            print("Select: 1-10: ")
+
+            try
+            {
+                choice = scanner.nextInt()
+                if(choice !in 1..11){
+                    println("Invalid choice. Please select a number between 1 and 10.")
+                }
+                else{
+                    break
+                }
+            }
+            catch(e: Exception){
+                println("Error: Invalid input. Please enter a valid number.")
+            }
+        }
+        
+        // TODO
+        when(choice){
+            1 -> {
+                //TODO
+            }
+            2 -> {
+                //TODO
+            }
+            3 -> {
+                //TODO
+            }
+            4 -> {
+                //TODO
+            }
+            5 -> {
+                //TODO
+            }
+            6 -> {
+                //TODO
+            }
+            7 -> {
+                //TODO
+            }
+            8 -> {
+                //TODO
+            }
+            9 -> {
+                //TODO
+            }
+            10 -> {
+                //TODO
+            }
+
+        }
     }
 }
 
@@ -556,41 +690,7 @@ fun ExitPage(){
 
 
 
-
 fun main() {
     val user = LogInSignUp()
     user.InitUser()
-
-    // // val library = Library()
-    // val librarian = Librarian("Alice", "L123")
-    // // library.MainDashBoard()
-    
-
-    // // Create some books
-    // val book1 = Book("Kotlin Programming", "John Doe", "12345")
-    // val book2 = Book("Advanced Kotlin", "Jane Smith", "67890")
-
-    // // Add books to the library
-    // librarian.addBook(library, book1)
-    // librarian.addBook(library, book2)
-
-    // // Create some members
-    // val member1 = Member("Bob", "M001")
-    // val member2 = Member("Charlie", "M002")
-
-    // // Add members to the library
-    // library.addMember(member1)
-    // library.addMember(member2)
-
-    // // Member borrows a book
-    // member1.borrowBook(book1)
-
-    // // Member tries to borrow the same book again (should show unavailable)
-    // member2.borrowBook(book1)
-
-    // // Member returns a book
-    // member1.returnBook(book1)
-
-    // // Search for books by title
-    // librarian.searchBook(library, "Kotlin")
 }
