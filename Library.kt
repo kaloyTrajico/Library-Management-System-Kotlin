@@ -3,12 +3,12 @@ import kotlin.system.exitProcess
 import java.io.File
 import java.time.Instant
 
-// Import all members from AppState enum class
+
 import AppState.*
-// Import all members from UserLoginResult sealed class
+
 import UserLoginResult.*
 
-// Book class represents a book in the library
+
 data class Book(
     var title: String, 
     var author: String, 
@@ -18,14 +18,14 @@ data class Book(
     var dueDate: Instant? = null
 )
 
-//Users  are the readers
+
 data class Users(
     val username: String,
     val pass: String,
     var numberOfBooksRead: Int
 )
 
-//Librarians
+
 data class Librarians(
     val username: String,
     val pass: String
@@ -38,7 +38,7 @@ enum class AppState {
     EXIT
 }
 
-// Sealed class to represent the result of a login/signup attempt
+
 sealed class UserLoginResult {
     object StayOnLogin : UserLoginResult() // Failed login/signup, stay on login screen
     object ExitApp : UserLoginResult()     // User chose to exit from the initial menu
@@ -47,7 +47,7 @@ sealed class UserLoginResult {
 }
 
 
-// Library class represents the collection of books and members
+
 class Library {
     val userManager = LogInSignUp()
     var currentUsers = userManager.retrieveReaders().toMutableList()
@@ -72,7 +72,7 @@ class Library {
         }
         println("----------------------\n")
         
-         // Prompt user to select a book if multiple results
+
         val selectedBook: Book? = if (searchResults.size == 1) {
             searchResults.first()
         } else {
@@ -109,7 +109,7 @@ class Library {
         
         println("Congratulations! You have just finished reading '${selectedBook.title}'")
         currentUser.numberOfBooksRead++
-         // Save the updated user data back to the CSV
+
         return saveReadChanges(currentUsers) // Delegate saving to a dedicated function       
     }
 
@@ -126,7 +126,7 @@ class Library {
     }
 
     
-    //Main Dashboard 
+
     fun MainDashBoard(username: String): AppState {
         val scanner = Scanner(System.`in`)
         var choice : Int? = null
@@ -158,13 +158,13 @@ class Library {
             }
         }
         return when (choice) {
-            1 -> LibraryMethods(username) // This now needs to return an AppState
+            1 -> LibraryMethods(username) 
             2 -> {
                 readerOfTheWeek()
-                READER_DASHBOARD // After showing reader of the week, return to the reader dashboard
+                READER_DASHBOARD 
             }
-            3 -> READER_DASHBOARD // Return to the reader's main menu
-            else -> READER_DASHBOARD // Fallback (shouldn't be hit due to input validation)
+            3 -> READER_DASHBOARD 
+            else -> READER_DASHBOARD 
         }
     }
 
@@ -216,14 +216,12 @@ class Library {
                 return READER_DASHBOARD 
             }
             else -> {
-                // This 'else' should ideally not be reached due to the `break` in the loop
-                // but if it is, you might want to return to a default state or re-enter the loop.
                 return LibraryMethods(username) // Default to staying in this menu
             }
         }
     }
 
-    //TODO
+
     fun readerOfTheWeek() {
         var reader = loadReaderOfTheWeek()
         println("+----------------------------------------------------------------+")
@@ -239,32 +237,8 @@ class Library {
         readLine()
     }
 
-    // fun loadReaderOfTheWeek(): Int{
-    //     var maxReader: Users? = null
-    //     try {
-    //         File("user.csv").useLines { lines ->
-    //             lines.drop(1).forEach { line -> // Skip header
-    //                 val parts = line.split(",")
-    //                 if (parts.size >= 3) {
-    //                     val username = parts[0]
-    //                     val pass = parts[1]
-    //                     val numberOfBooksRead = parts[2].toIntOrNull() ?: 0 
-    //                     if (maxReader == null || numberOfBooksRead > maxReader.numberOfBooksRead) {
-    //                         maxReader = Users(username, pass, numberOfBooksRead)
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     } catch (e: Exception) {
-    //         println("Error reading CSV: ${e.message}")
-    //     }
-    //     return maxReader
-    // }
-
-
     fun loadReaderOfTheWeek(): Users? {
-        val allUsers = userManager.retrieveReaders() // Load fresh data
-        // Use maxByOrNull to find the user with the maximum numberOfBooksRead
+        val allUsers = userManager.retrieveReaders() 
         return allUsers.maxByOrNull { it.numberOfBooksRead }
     }
 
@@ -523,16 +497,16 @@ class LogInSignUp{
         print("Set Password: ")
         var password = scanner.nextLine()
         
-        if (retrievedLibrariansUsers.any { it.username == username }) { // Use `any` for clearer "exists" check
+        if (retrievedLibrariansUsers.any { it.username == username }) { 
             println("Username already exists! Try a different one.")
             return StayOnLogin
         }
 
         saveSignUpLibrarianAcc(username, password)
         val newLibrarian = Librarians(username, password)
-        retrievedLibrariansUsers.add(newLibrarian) // Add to in-memory list
+        retrievedLibrariansUsers.add(newLibrarian) 
         println("Account created successfully for $username.")
-        return LibrarianLoggedIn(newLibrarian) // <--- Correctly returns UserLoginResult with the new librarian
+        return LibrarianLoggedIn(newLibrarian) 
     }
 
     fun retrieveReaders(): List<Users>{
@@ -587,17 +561,17 @@ class LogInSignUp{
         val newLine = "$username,$password,0" // numberOfBooksRead starts at 0
 
         try {
-            // If the file doesn't exist, create it and write the header first
+
             if (!file.exists()) {
                 file.writeText("readerName,password,numberOfBooksRead\n")
             }
 
-            // Ensure the file ends with a newline before appending
+
             if (!file.readText().endsWith("\n")) {
                 file.appendText("\n")
             }   
 
-            // Append the new user line
+
             file.appendText("$newLine\n")
             println("User account for '$username' created successfully.")
         } catch (e: Exception) {
@@ -611,17 +585,17 @@ class LogInSignUp{
         val newLine = "$username,$password" 
 
         try {
-            // If the file doesn't exist, create it and write the header first
+
             if (!file.exists()) {
                 file.writeText("readerName,password\n")
             }
 
-            // Ensure the file ends with a newline before appending
+
             if (!file.readText().endsWith("\n")) {
                 file.appendText("\n")
             }   
 
-            // Append the new user line
+
             file.appendText("$newLine\n")
             println("User account for '$username' created successfully.")
         } catch (e: Exception) {
@@ -922,7 +896,7 @@ class userReader(var username: String, var password: String){
     }
 
     
-    // MAIN FUNCTIONS
+
     fun publishBook(){
         val scanner = Scanner(System.`in`)
         var bookName: String = ""
@@ -1164,8 +1138,8 @@ class userReader(var username: String, var password: String){
     }
 }
 
-// TODO
-// You need to have save function to update the librarian.csv
+
+
 class userLibrarian(var username: String, var pass: String, val library: Library) {
 
     private val originalUsername = username
@@ -1228,7 +1202,7 @@ class userLibrarian(var username: String, var pass: String, val library: Library
         }
     }
 
-    // ----- Book Management -----
+
     fun addBook(scanner: Scanner) {
         println("+----------- ADD A BOOK ------------+")
         print("Enter book title: ")
@@ -1336,7 +1310,7 @@ class userLibrarian(var username: String, var pass: String, val library: Library
         println("Overdue: $overdue")
     }
 
-    // ----- Account Management -----
+
     fun manageAccount(scanner: Scanner): Boolean {
         while (true) {
             println("+--------- MANAGE ACCOUNT ----------+")
@@ -1437,57 +1411,43 @@ fun main() {
     var activeReader: Users? = null
     var activeLibrarian: Librarians? = null
 
-    while (currentAppState != EXIT) { // <--- Correct (imported from AppState.*)
+    while (currentAppState != EXIT) { 
         when (currentAppState) {
-            LOGIN_SIGNUP -> { // <--- Correct (imported from AppState.*)
+            LOGIN_SIGNUP -> { 
                 val result = loginSignUp.InitUserAndGetUser()
-                when (result) { // This 'when' is exhaustive because UserLoginResult is a sealed class
-                    is ReaderLoggedIn -> { // <--- Correct (imported from UserLoginResult.*)
-                        // User is logged in as a reader, transition to reader dashboard
+                when (result) { 
+                    is ReaderLoggedIn -> { 
+                       
                         currentAppState = userReader(result.user.username, result.user.pass).readerPage()
                     }
-                    is LibrarianLoggedIn -> { // <--- Correct (imported from UserLoginResult.*)
-                        // User is logged in as a librarian, transition to librarian dashboard
+                    is LibrarianLoggedIn -> { 
                         currentAppState = userLibrarian(result.librarian.username, result.librarian.pass, Library()).librarianPage()
                     }
-                    ExitApp -> { // <--- Correct (imported from UserLoginResult.*)
-                        // User chose to exit from the initial login/signup menu
-                        currentAppState = EXIT // <--- Correct (imported from AppState.*)
+                    ExitApp -> { 
+                        currentAppState = EXIT 
                     }
-                    StayOnLogin -> { // <--- Correct (imported from UserLoginResult.*)
-                        // Login or signup failed, stay on the login/signup screen
-                        // currentAppState is already LOGIN_SIGNUP, so no change needed.
+                    StayOnLogin -> { 
                     }
                 }
             }
 
             READER_DASHBOARD -> {
-                // If we are in READER_DASHBOARD, we should call the reader's main page.
-                // It's crucial that `activeReader` is not null here.
                 if (activeReader != null) {
-                    // Call the readerPage, which handles all reader interactions
-                    // and returns the *next* AppState (e.g., LOGIN_SIGNUP on logout/delete).
                     currentAppState = userReader(activeReader.username, activeReader.pass).readerPage()
-
-                    // If the reader logged out or deleted their account, clear the activeReader.
                     if (currentAppState == LOGIN_SIGNUP) {
                         activeReader = null
                     }
                 } else {
-                    // This state should ideally only be entered after a successful ReaderLoggedIn.
-                    // If activeReader is somehow null, it's an unexpected state; return to login.
                     println("Error: Reader dashboard reached without active reader. Returning to login.")
                     currentAppState = LOGIN_SIGNUP
                 }
             }
             LIBRARIAN_DASHBOARD -> {
-                // Similar logic for librarians
                 if (activeLibrarian != null) {
-                    // Call the librarianPage, which handles all librarian interactions
+        
                     currentAppState = userLibrarian(activeLibrarian.username, activeLibrarian.pass, Library()).librarianPage()
 
-                    // If the librarian logged out, clear the activeLibrarian.
-                    if (currentAppState == LOGIN_SIGNUP) { // Assuming librarians also log out to LOGIN_SIGNUP
+                    if (currentAppState == LOGIN_SIGNUP) { 
                         activeLibrarian = null
                     }
                 } else {
@@ -1496,11 +1456,8 @@ fun main() {
                 }
             }
             EXIT -> {
-                // When currentAppState becomes EXIT, the `while` loop condition (currentAppState != EXIT)
-                // becomes false, and the loop naturally terminates.
-                // We'll call ExitPage() after the loop.
             }
         }
     }
-    ExitPage() // Call ExitPage only when the main loop exits
+    ExitPage() 
 }
