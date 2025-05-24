@@ -1115,7 +1115,7 @@ class userLibrarian(var username: String, var pass: String, val library: Library
                     return LOGIN_SIGNUP // Indicate that we want to go back to login/signup
                 }
                 else -> { // Handle invalid choices
-                    println("Invalid choice. Please select a number between 1 and 11.")
+                    println("Invalid choice. Please select a number between 1 and 10.")
                 }
             }
         }
