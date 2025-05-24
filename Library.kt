@@ -1068,7 +1068,7 @@ class userReader(var username: String, var password: String){
 class userLibrarian(var username: String, var pass: String, val library: Library){
     fun librarianPage(): AppState{ 
         println("+---------------------------------------+")
-        println("WELCOME  $username!")
+        println("        WELCOME  $username!")
         println("+---------------------------------------+")
         
         val scanner = Scanner(System.`in`)
@@ -1120,23 +1120,6 @@ class userLibrarian(var username: String, var pass: String, val library: Library
             }
         }
     }
-        
-
-        private fun save() {
-        val file = File("books.csv")
-        try {
-            // Write header
-            file.writeText("title,author,isbn,available\n")
-            // Write all books
-            library.getAllBooks().forEach { book ->
-                val line = "${book.title},${book.author},${book.isbn},${book.available}\n"
-                file.appendText(line)
-            }
-            println("Library books saved successfully.")
-        } catch (e: Exception) {
-            println("Error saving books to CSV: ${e.message}")
-        }
-        }
 
         private fun changeUsername(scanner: Scanner) {
         print("Enter new username: ")
@@ -1310,7 +1293,9 @@ class userLibrarian(var username: String, var pass: String, val library: Library
         if (borrowed.isEmpty()) {
             println("No books are currently borrowed.")
         } else {
-            println("--- Borrowed Books ---")
+            println("+-------------------------------------------+")
+            println("|             BORROWED BOOKS                |")
+            println("+-------------------------------------------+")
          borrowed.forEach {
              println("${it.title} by ${it.author} | ISBN: ${it.isbn} | Borrowed by: ${it.borrowedBy}")
             }
@@ -1323,7 +1308,10 @@ class userLibrarian(var username: String, var pass: String, val library: Library
         if (overdue.isEmpty()) {
          println("No overdue books.")
         } else {
-            println("--- Overdue Books ---")
+            println("+-------------------------------------------+")
+            println("|              OVERDUE BOOKS                |")
+            println("+-------------------------------------------+")
+
             overdue.forEach {
                 println("${it.title} by ${it.author} | Due: ${it.dueDate} | Borrowed by: ${it.borrowedBy}")
             }
