@@ -81,7 +81,7 @@ class Library {
     fun getBookByISBN(isbn: String): Book? {
         return books.find { it.isbn == isbn }
     }
-<<<<<<< Updated upstream
+
 
     fun getAllBooks(): List<Book> {
         // This exposes the current book list so userLibrarian can save it.
@@ -1069,11 +1069,8 @@ class userReader(var username: String, var password: String){
 // TODO
 // You need to have save function to update the librarian.csv
 class userLibrarian(var username: String, var pass: String, val library: Library){
-<<<<<<< Updated upstream
+
     fun librarianPage(): AppState{ 
-=======
-    fun librarianPage(): AppState{
->>>>>>> Stashed changes
         println("+---------------------------------------+")
         println("        WELCOME  $username!")
         println("+---------------------------------------+")
@@ -1081,29 +1078,6 @@ class userLibrarian(var username: String, var pass: String, val library: Library
         val scanner = Scanner(System.`in`)
        // var choice : Int? = null
 
-<<<<<<< Updated upstream
-        while (true) {
-            println("+---------------------------------------+")
-            println("|       LIBRARY MANAGEMENT SYSTEM       |")
-            println("+---------------------------------------+")
-            println("|  (1) Add a Book                       |")
-            println("|  (2) Remove a Book                    |")
-            println("|  (3) Update Book Info                 |")
-            println("|  (4) View All Books                   |")
-            println("|  (5) View Borrowed Books              |")
-            println("|  (6) View Overdue Books               |")
-            println("|  (7) Manage Your Accounts             |")
-            println("|  (8) View Ratings and Reviews         |")
-            println("|  (9) Generate Library Reports         |")
-            println("| (10) Log Out                          |")
-            println("+---------------------------------------+")
-            print("Select(1-10): ")
-            
-            try {
-                choice = scanner.nextInt()
-                if(choice !in 1..10){
-                    println("Invalid choice. Please select a number between 1 and 10.")
-=======
         while(true){
             println("+-------------------------------------------+")
             println("|          LIBRARIAN CONTROL PANEL          |")
@@ -1126,15 +1100,15 @@ class userLibrarian(var username: String, var pass: String, val library: Library
                 var choice = scanner.nextInt()
                 scanner.nextLine()
                 if(choice !in 1..10){
-                    println("Invalid choice. Please select a number between 3 and 10.")
+                    println("Invalid choice. Please select a number between 1 and 10.")
                 } else {
                     break
->>>>>>> Stashed changes
+
                 }
             } catch(e: Exception){
                 println("Error: Invalid input. Please enter a valid number.")
             }
-<<<<<<< Updated upstream
+
     
             when(choice) {
                 1 -> addBook()
@@ -1153,33 +1127,6 @@ class userLibrarian(var username: String, var pass: String, val library: Library
                 else -> { // Handle invalid choices
                     println("Invalid choice. Please select a number between 1 and 10.")
                 }
-=======
-        }
-        
-        // TODO
-        when(choice){
-            // TODO: Implement librarian functionalities
-            1 -> addBook()
-            2 -> removeBook()
-            3 -> updateBookInfo()
-            4 ->  {
-                    println("Library")
-                    val library = Library()
-                    library.MainDashBoard()
-                }
-            5 -> println("View Borrowed Books functionality not implemented yet.")
-            6 -> println("View Overdue Books functionality not implemented yet.")
-            7 -> println("Manage Your Account functionality not implemented yet.")
-            8 -> println("View Ratings and Reviews functionality not implemented yet.")
-            9 -> println("Generate Library Reports functionality not implemented yet.")
-            10 -> {
-                println("Logging out...")
-                return LOGIN_SIGNUP // <--- Correct (imported from AppState.*)
-            }
-            else -> {
-                // Similar to readerPage, loop continues for invalid input
->>>>>>> Stashed changes
-            }
         }
     }
 
@@ -1441,57 +1388,10 @@ class userLibrarian(var username: String, var pass: String, val library: Library
         println("Overdue: $overdue")
     }
 
+    }
+
 }
 
-<<<<<<< Updated upstream
-
-=======
-     fun addBook() {
-        println("--- Add a Book ---")
-        print("Enter book title: ")
-        val title = readLine() ?: return
-        print("Enter author: ")
-        val author = readLine() ?: return
-        print("Enter ISBN: ")
-        val isbn = readLine() ?: return
-
-        val newBook = Book(title, author, isbn)
-        library.addBook(newBook)
-        println("Book added successfully: $title by $author")
-    }
-
-      fun removeBook() {
-        println("--- Remove a Book ---")
-        print("Enter ISBN of the book to remove: ")
-        val isbn = readLine() ?: return
-
-        val result = library.removeBookByISBN(isbn)
-        if (result) println("Book removed successfully.")
-        else println("Book with ISBN $isbn not found.")
-    }
-
-     fun updateBookInfo() {
-        println("--- Update Book Info ---")
-        print("Enter ISBN of the book to update: ")
-        val isbn = readLine() ?: return
-
-        val book = library.getBookByISBN(isbn)
-        if (book == null) {
-            println("Book not found.")
-            return
-        }
-
-        print("Enter new title (leave blank to keep current: '${book.title}'): ")
-        val newTitle = readLine()
-        print("Enter new author (leave blank to keep current: '${book.author}'): ")
-        val newAuthor = readLine()
-
-        if (!newTitle.isNullOrBlank()) book.title = newTitle
-        if (!newAuthor.isNullOrBlank()) book.author = newAuthor
-
-        println("Book updated successfully.")
-    }
->>>>>>> Stashed changes
 
 fun ExitPage(){
     println("+---------------------------------------------------+")
