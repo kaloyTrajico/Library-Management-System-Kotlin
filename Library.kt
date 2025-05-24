@@ -1229,7 +1229,6 @@ fun ExitPage(){
 }
 
 
-
 fun main() {
     val loginSignUp = LogInSignUp()
     var currentAppState: AppState = LOGIN_SIGNUP // <--- Correct (imported from AppState.*)
