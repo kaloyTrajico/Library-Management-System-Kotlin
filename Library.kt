@@ -1093,13 +1093,13 @@ class userLibrarian(var username: String, var pass: String, val library: Library
             
             try {
                 choice = scanner.nextInt()
-                if(choice !in 1..11){
-                    println("Invalid choice. Please select a number between 1 and 11.")
+                if(choice !in 1..10){
+                    println("Invalid choice. Please select a number between 1 and 10.")
                 }
             } catch(e: Exception){
                 println("Error: Invalid input. Please enter a valid number.")
             }
-            
+    
             when(choice) {
                 1 -> addBook()
                 2 -> removeBook()
