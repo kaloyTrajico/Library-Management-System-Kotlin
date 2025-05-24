@@ -1070,65 +1070,60 @@ class userReader(var username: String, var password: String){
 // You need to have save function to update the librarian.csv
 class userLibrarian(var username: String, var pass: String, val library: Library){
 
-    fun librarianPage(): AppState{ 
-        println("+---------------------------------------+")
-        println("        WELCOME  $username!")
-        println("+---------------------------------------+")
-        
-        val scanner = Scanner(System.`in`)
-       // var choice : Int? = null
+    fun librarianPage(): AppState {
+    println("+---------------------------------------+")
+    println("        WELCOME  $username!")
+    println("+---------------------------------------+")
 
-        while(true){
-            println("+-------------------------------------------+")
-            println("|          LIBRARIAN CONTROL PANEL          |")
-            println("+-------------------------------------------+")
-            println("|  (1) Add a Book                           |")
-            println("|  (2) Remove a Book                        |")
-            println("|  (3) Update Book Info                     |")
-            println("|  (4) View All Books                       |")
-            println("|  (5) View Borrowed Books                  |")
-            println("|  (6) View Overdue Books                   |")
-            println("|  (7) Manage Your Account                  |")
-            println("|  (8) View Ratings and Reviews             |")
-            println("|  (9) Generate Library Reports             |")
-            println("| (10) Log Out                              |")
-            println("+-------------------------------------------+")
-            print("Select: 1-10: ")
+    val scanner = Scanner(System.`in`)
 
-            try
-            {
-                var choice = scanner.nextInt()
-                scanner.nextLine()
-                if(choice !in 1..10){
-                    println("Invalid choice. Please select a number between 1 and 10.")
-                } else {
-                    break
+    while (true) {
+        println("+-------------------------------------------+")
+        println("|          LIBRARIAN CONTROL PANEL          |")
+        println("+-------------------------------------------+")
+        println("|  (1) Add a Book                           |")
+        println("|  (2) Remove a Book                        |")
+        println("|  (3) Update Book Info                     |")
+        println("|  (4) View All Books                       |")
+        println("|  (5) View Borrowed Books                  |")
+        println("|  (6) View Overdue Books                   |")
+        println("|  (7) Manage Your Account                  |")
+        println("|  (8) View Ratings and Reviews             |")
+        println("|  (9) Generate Library Reports             |")
+        println("| (10) Log Out                              |")
+        println("+-------------------------------------------+")
+        print("Select (1-10): ")
 
-                }
-            } catch(e: Exception){
-                println("Error: Invalid input. Please enter a valid number.")
+        val choice = try {
+            scanner.nextInt().also { scanner.nextLine() } // consumes newline
+        } catch (e: Exception) {
+            scanner.nextLine() // Clear invalid input
+            println("Invalid input. Please enter a number between 1 and 10.")
+            continue
+        }
+
+        when (choice) {
+            1 -> addBook()
+            2 -> removeBook()
+            3 -> updateBookInfo()
+            4 -> library.displayBooks()
+            5 -> viewBorrowedBooks()
+            6 -> viewOverdueBooks()
+            7 -> {
+                val deleted = manageAccount(scanner)
+                if (deleted) return LOGIN_SIGNUP
             }
-
-    
-            when(choice) {
-                1 -> addBook()
-                2 -> removeBook()
-                3 -> updateBookInfo()
-                4 -> displayBooks()
-                5 -> viewBorrowedBooks()
-                6 -> viewOverdueBooks()
-                7 -> manageAccount()
-                8 -> viewRatingsAndReviews()
-                9 -> generateReports()
-                10 -> {
-                    println("Logging out...")
-                    return LOGIN_SIGNUP // Indicate that we want to go back to login/signup
-                }
-                else -> { // Handle invalid choices
-                    println("Invalid choice. Please select a number between 1 and 10.")
-                }
+            8 -> viewRatingsAndReviews()
+            9 -> generateReports()
+            10 -> {
+                println("Logging out...")
+                return LOGIN_SIGNUP
+            }
+            else -> println("Invalid choice. Please select a number between 1 and 10.")
         }
     }
+}
+
 
         private fun changeUsername(scanner: Scanner) {
         print("Enter new username: ")
@@ -1390,7 +1385,7 @@ class userLibrarian(var username: String, var pass: String, val library: Library
 
     }
 
-}
+
 
 
 fun ExitPage(){
