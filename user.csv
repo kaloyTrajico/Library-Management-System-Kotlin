@@ -1,4 +1,8 @@
 readerName, password, numberOfBooksRead
 Reisen,1,2
 wen,123,0
+<<<<<<< Updated upstream
 chuchu,111,0
+=======
+kac,111,0
+>>>>>>> Stashed changes
