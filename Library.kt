@@ -47,28 +47,71 @@ sealed class UserLoginResult {
 
 // Library class represents the collection of books and members
 class Library {
-
+    val userManager = LogInSignUp()
+    var currentUsers = userManager.retrieveReaders().toMutableList()
     private val books = loadBooksFromCSV("books.csv").toMutableList()
     private val scanner = Scanner(System.`in`)
 
-    fun searchBook(query: String): List<Book> {
-        val results = books.filter { it.title.equals(query, ignoreCase = true) ||
+    fun readBook(query: String, username: String): Boolean {
+        val searchResults = books.filter { it.title.equals(query, ignoreCase = true) ||
                                       it.author.equals(query, ignoreCase = true) ||
                                       it.isbn.equals(query, ignoreCase = true) }
-        return if (results.isEmpty()) {
+        
+        if (searchResults.isEmpty()) {
             println("No books found for '$query'")
-            emptyList()
-        } else {
-            println("\n--- Search Results ---")
-            results.forEach { println("Found: ${it.title} by ${it.author}, ISBN: ${it.isbn}, Available: ${it.available}") }
-            println("----------------------\n")
-            results
+            return false // Indicate failure
         }
+
+        println("\n--- Search Results ---")
+        searchResults.forEachIndexed { index, book ->
+            println("${index + 1}. Title: ${book.title}, Author: ${book.author}, ISBN: ${book.isbn}, Available: ${book.available}")
+        }
+        println("----------------------\n")
+        
+         // Prompt user to select a book if multiple results
+        val selectedBook: Book? = if (searchResults.size == 1) {
+            searchResults.first()
+        } else {
+            println("Enter the number of the book you want to read (or 0 to cancel):")
+            val choice = scanner.nextLine().toIntOrNull()
+            if (choice != null && choice > 0 && choice <= searchResults.size) {
+                searchResults[choice - 1]
+            } else {
+                println("Invalid selection or cancelled.")
+                null
+            }
+        }
+
+        if (selectedBook == null) {
+            return false // No book selected or invalid choice
+        }
+
+        if (!selectedBook.available) {
+            println("Sorry, '${selectedBook.title}' is currently not available.")
+            return false
+        }
+
+
+        val currentUser = currentUsers.find { it.username.equals(username, ignoreCase = true) }
+        if (currentUser == null) {
+            println("Error: User '$username' not found in system.")
+            return false // User not found
+        }
+
+
+        println("+-------------------------------+")
+        println("|           READING...          |") 
+        println("+-------------------------------+")
+        
+        println("Congratulations! You have just finished reading '${selectedBook.title}'")
+        currentUser.numberOfBooksRead++
+         // Save the updated user data back to the CSV
+        return saveReadChanges(currentUsers) // Delegate saving to a dedicated function       
     }
 
     
     //Main Dashboard 
-    fun MainDashBoard(): AppState {
+    fun MainDashBoard(username: String): AppState {
         val scanner = Scanner(System.`in`)
         var choice : Int? = null
 
@@ -87,6 +130,7 @@ class Library {
                 choice = scanner.nextInt()
                 if(choice !in 1..3){
                     println("Invalid choice. Please select a number between 1 and 3.")
+                    scanner.nextLine()
                 }
                 else{
                     break
@@ -98,7 +142,7 @@ class Library {
             }
         }
         return when (choice) {
-            1 -> LibraryMethods() // This now needs to return an AppState
+            1 -> LibraryMethods(username) // This now needs to return an AppState
             2 -> {
                 readerOfTheWeek()
                 READER_DASHBOARD // After showing reader of the week, return to the reader dashboard
@@ -108,7 +152,7 @@ class Library {
         }
     }
 
-    fun LibraryMethods(): AppState {
+    fun LibraryMethods(username: String): AppState {
         var choice : Int? = null
         while(true){
             println("+-------------------------------+")
@@ -116,15 +160,15 @@ class Library {
             println("+-------------------------------+")
             println("|  (1) Display all books        |")
             println("|  (2) Read a book              |")
-            println("|  (3) Search a book            |")
-            println("|  (4) Back                     |")
+            println("|  (3) Back                     |")
             println("+-------------------------------+")
-            print("Select(1-4): ")
+            print("Select(1-3): ")
 
             try
             {
                 choice = scanner.nextInt()
-                if(choice !in 1..4){
+                scanner.nextLine()
+                if(choice !in 1..3){
                     println("Invalid choice. Please select a number between 1 and 4.")
                 }
                 else{
@@ -140,40 +184,72 @@ class Library {
         when(choice){
             1 -> {
                 displayBooks()
-                return LibraryMethods() // After displaying, stay in LibraryMethods menu
+                return LibraryMethods(username) // After displaying, stay in LibraryMethods menu
             }
-            2 -> {
-                println("Read a book functionality not implemented yet.")
-                scanner.nextLine() // Consume newline after int input
-                return LibraryMethods() // Stay in LibraryMethods menu
+            2 -> { 
+                println("+-------------------------------+")
+                println("|   LIBRARY MANAGEMENT SYSTEM   |")
+                println("+-------------------------------+")
+                print("Enter book title & author, or ISBN only to read: ")
+                val query = scanner.nextLine()
+                println("Searching for '$query'...")
+                readBook(query, username)
+                return LibraryMethods(username)
             }
             3 -> {
-                scanner.nextLine() // Consume the leftover newline from previous nextInt()
-                print("Enter book title, author, or ISBN to search: ")
-                val query = scanner.nextLine() // Use nextLine() for multi-word input
-                println("Searching for '$query'...")
-                searchBook(query)
-                return LibraryMethods() // After searching, stay in LibraryMethods menu
-            }
-            4 -> {
-                return READER_DASHBOARD // Go back to the reader's main menu
+                return READER_DASHBOARD 
             }
             else -> {
                 // This 'else' should ideally not be reached due to the `break` in the loop
                 // but if it is, you might want to return to a default state or re-enter the loop.
-                return LibraryMethods() // Default to staying in this menu
+                return LibraryMethods(username) // Default to staying in this menu
             }
         }
     }
 
     //TODO
     fun readerOfTheWeek() {
-        println("\n--- Reader of the Week ---")
-        println("Logic for Reader of the Week not implemented yet.")
-        println("--------------------------\n")
+        var reader = loadReaderOfTheWeek()
+        println("+----------------------------------------------------------------+")
+        println("|                      READER OF THE WEEK                        |")
+        println("+----------------------------------------------------------------+")
+        if(reader != null){
+            println("CONGRATULATIONS TO ${reader.username} who read ${reader.numberOfBooksRead} books!")
+        } else {
+            println("No reader of the week found or an error occurred.")
+        }
         println("Press Enter to continue...")
-        scanner.nextLine() // Consume any pending newline
-        readLine() // Wait for user input
+        scanner.nextLine() 
+        readLine()
+    }
+
+    // fun loadReaderOfTheWeek(): Int{
+    //     var maxReader: Users? = null
+    //     try {
+    //         File("user.csv").useLines { lines ->
+    //             lines.drop(1).forEach { line -> // Skip header
+    //                 val parts = line.split(",")
+    //                 if (parts.size >= 3) {
+    //                     val username = parts[0]
+    //                     val pass = parts[1]
+    //                     val numberOfBooksRead = parts[2].toIntOrNull() ?: 0 
+    //                     if (maxReader == null || numberOfBooksRead > maxReader.numberOfBooksRead) {
+    //                         maxReader = Users(username, pass, numberOfBooksRead)
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     } catch (e: Exception) {
+    //         println("Error reading CSV: ${e.message}")
+    //     }
+    //     return maxReader
+    // }
+
+
+    fun loadReaderOfTheWeek(): Users? {
+        val allUsers = userManager.retrieveReaders() // Load fresh data
+        // Use maxByOrNull to find the user with the maximum numberOfBooksRead
+        return allUsers.maxByOrNull { it.numberOfBooksRead }
     }
 
     fun displayBooks() {
@@ -214,6 +290,40 @@ class Library {
         }
         return books
     }
+
+    private fun saveReadChanges(users: List<Users>): Boolean{
+        val USER_CSV_FILE = File("user.csv")
+        try{
+            val lines = mutableListOf<String>()
+            lines.add("username,password,numberOfBooksRead") // Add header
+
+            users.forEach { user ->
+                lines.add("${user.username},${user.pass},${user.numberOfBooksRead}")
+            }
+
+            USER_CSV_FILE.writeText(lines.joinToString("\n")) // Write all lines back to the file
+            println("User data saved successfully.")
+            return true
+        } catch (e: Exception) {
+            println("Error saving user data to CSV: ${e.message}")
+            return false
+        }
+    }
+    
+    fun searchBook(query: String): List<Book> {
+        val results = books.filter { it.title.equals(query, ignoreCase = true) ||
+                                      it.author.equals(query, ignoreCase = true) ||
+                                      it.isbn.equals(query, ignoreCase = true) }
+        return if (results.isEmpty()) {
+            println("No books found for '$query'")
+            emptyList()
+        } else {
+            println("\n--- Search Results ---")
+            results.forEach { println("Found: ${it.title} by ${it.author}, ISBN: ${it.isbn}, Available: ${it.available}") }
+            println("----------------------\n")
+            results
+        }
+    }
 }
 
 
@@ -241,6 +351,7 @@ class LogInSignUp{
                 choice = scanner.nextInt()
                 if(choice !in 1..3){
                     println("Invalid choice. Please select a number between 1 and 3.")
+                    scanner.nextLine()
                 }
                 else{
                     break
@@ -254,7 +365,6 @@ class LogInSignUp{
         
         return when(choice){
             1 -> { //Log In
-                println("Log In")
                 val userType = readerOrLibrarian()
                 when(userType){
                     1-> logInReader() 
@@ -310,7 +420,6 @@ class LogInSignUp{
     }
 
     fun logInReader(): UserLoginResult {
-        println("Log In Reader")
         val scanner = Scanner(System.`in`)
         println("+-------------------------------------------------+")
         println("|                  Log In                         |")
@@ -506,9 +615,7 @@ class LogInSignUp{
 
 }
 
-// TODO
-// This class need to be private
-// You need to have save function to update the user.csv
+
 class userReader(var username: String, var password: String){
 
     init {
@@ -548,16 +655,18 @@ class userReader(var username: String, var password: String){
                 choice = scanner.nextInt()
                 if(choice !in 1..11){
                     println("Invalid choice. Please select a number between 1 and 11.")
+                    scanner.nextLine()
                 }
             } catch(e: Exception){
                 println("Error: Invalid input. Please enter a valid number.")
+                scanner.nextLine()
             }
             
             when(choice) {
                 1 -> {
                     println("Library")
                     val library = Library()
-                    library.MainDashBoard()
+                    library.MainDashBoard(username)
                 }
                 2 -> publishBook()
                 3 -> borrowBook()
@@ -585,8 +694,6 @@ class userReader(var username: String, var password: String){
         }
     }
 
-    //TODO
-    //Helper Functions
     private fun changeUsername(scanner: Scanner) {
         print("Enter new username: ")
         val newUsername = scanner.nextLine().trim()
@@ -1080,26 +1187,27 @@ class userLibrarian(var username: String, var pass: String){
                 println("Error: Invalid input. Please enter a valid number.")
                 scanner.nextLine()
             }
-        }
         
-        // TODO
-        when(choice){
-            // TODO: Implement librarian functionalities
-            1 -> println("Add Book functionality not implemented yet.")
-            2 -> println("Remove Book functionality not implemented yet.")
-            3 -> println("Update Book Info functionality not implemented yet.")
-            4 -> println("View All Books functionality not implemented yet.")
-            5 -> println("View Borrowed Books functionality not implemented yet.")
-            6 -> println("View Overdue Books functionality not implemented yet.")
-            7 -> println("Manage Your Account functionality not implemented yet.")
-            8 -> println("View Ratings and Reviews functionality not implemented yet.")
-            9 -> println("Generate Library Reports functionality not implemented yet.")
-            10 -> {
-                println("Logging out...")
-                return LOGIN_SIGNUP // <--- Correct (imported from AppState.*)
-            }
-            else -> {
-                // Similar to readerPage, loop continues for invalid input
+        
+            // TODO
+            when(choice){
+                // TODO: Implement librarian functionalities
+                1 -> println("Add Book functionality not implemented yet.")
+                2 -> println("Remove Book functionality not implemented yet.")
+                3 -> println("Update Book Info functionality not implemented yet.")
+                4 -> println("View All Books functionality not implemented yet.")
+                5 -> println("View Borrowed Books functionality not implemented yet.")
+                6 -> println("View Overdue Books functionality not implemented yet.")
+                7 -> println("Manage Your Account functionality not implemented yet.")
+                8 -> println("View Ratings and Reviews functionality not implemented yet.")
+                9 -> println("Generate Library Reports functionality not implemented yet.")
+                10 -> {
+                    println("Logging out...")
+                    return LOGIN_SIGNUP // <--- Correct (imported from AppState.*)
+                }
+                else -> {
+                    // Similar to readerPage, loop continues for invalid input
+                }
             }
         }
     }
