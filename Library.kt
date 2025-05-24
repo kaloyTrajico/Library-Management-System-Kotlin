@@ -10,12 +10,12 @@ import UserLoginResult.*
 
 // Book class represents a book in the library
 data class Book(
-    val title: String, 
-    val author: String, 
+    var title: String, 
+    var author: String, 
     val isbn: String, 
-    var available: Boolean = true
-    var borrowedBy: String = null
-    var dueDate: Instant = null
+    var available: Boolean = true,
+    var borrowedBy: String? = null,
+    var dueDate: Instant? = null
 )
 
 //Users  are the readers
@@ -50,9 +50,9 @@ sealed class UserLoginResult {
 // Library class represents the collection of books and members
 class Library {
 
-    private val books = loadBooksFromCSV("books.csv").toMutableList()
+    val books = loadBooksFromCSV("books.csv").toMutableList()
     private val scanner = Scanner(System.`in`)
-    private val reviews = mutableMapOf<String, MutableList<String>>()
+    val reviews = mutableMapOf<String, MutableList<String>>()
 
 
     fun searchBook(query: String): List<Book> {
@@ -82,15 +82,6 @@ class Library {
         return books.find { it.isbn == isbn }
     }
 
-
-    fun getAllBooks(): List<Book> {
-        // This exposes the current book list so userLibrarian can save it.
-        // Return a copy or unmodifiable list if needed.
-        return books.toList()
-    }
-    
-=======
->>>>>>> Stashed changes
     
     //Main Dashboard 
     fun MainDashBoard(): AppState {
@@ -1070,6 +1061,9 @@ class userReader(var username: String, var password: String){
 // You need to have save function to update the librarian.csv
 class userLibrarian(var username: String, var pass: String, val library: Library) {
 
+    private val originalUsername = username
+
+    
     fun librarianPage(): AppState {
         println("+---------------------------------------+")
         println("        WELCOME  $username!")
@@ -1106,12 +1100,15 @@ class userLibrarian(var username: String, var pass: String, val library: Library
                 1 -> addBook(scanner)
                 2 -> removeBook(scanner)
                 3 -> updateBookInfo(scanner)
-                4 -> displayBooks()
+                4 -> { val library = Library()
+                    library.displayBooks()
+                    }
                 5 -> viewBorrowedBooks()
                 6 -> viewOverdueBooks()
                 7 -> {
                     val deleted = manageAccount(scanner)
                     if (deleted) return LOGIN_SIGNUP
+                    save()
                 }
                 8 -> viewRatingsAndReviews()
                 9 -> generateReports()
@@ -1166,27 +1163,17 @@ class userLibrarian(var username: String, var pass: String, val library: Library
         }
 
         print("New title (leave blank to keep '${book.title}'): ")
-        val newTitle = scanner.nextLine()
+        val new_Title = scanner.nextLine()
         print("New author (leave blank to keep '${book.author}'): ")
-        val newAuthor = scanner.nextLine()
+        val new_Author = scanner.nextLine()
 
-        if (newTitle.isNotBlank()) book.title = newTitle
-        if (newAuthor.isNotBlank()) book.author = newAuthor
+        if (new_Title.isNotBlank()) book.title = new_Title
+        if (new_Author.isNotBlank()) book.author = new_Author
 
         println("Book info updated.")
         save()
     }
 
-    fun displayBooks() {
-        println("+----------- ALL BOOKS ------------+")
-        if (library.books.isEmpty()) {
-            println("No books available.")
-            return
-        }
-        library.books.forEach {
-            println("${it.title} by ${it.author} | ISBN: ${it.isbn} | Available: ${it.available}")
-        }
-    }
 
     fun viewBorrowedBooks() {
         val borrowed = library.books.filter { !it.available }
@@ -1295,6 +1282,7 @@ class userLibrarian(var username: String, var pass: String, val library: Library
     private fun confirmDelete(scanner: Scanner): Boolean {
         print("Are you sure you want to delete your account? (yes/no): ")
         return scanner.nextLine().trim().lowercase() == "yes"
+        save()
     }
 
     private fun deleteAccount() {
@@ -1302,19 +1290,17 @@ class userLibrarian(var username: String, var pass: String, val library: Library
         val lines = file.readLines().filterNot { it.startsWith("$username,") }
         file.writeText(lines.joinToString("\n"))
         println("Account removed from system.")
+        save()
     }
 
     private fun save() {
         val file = File("librarian.csv")
         val updated = file.readLines().map {
             val parts = it.split(",")
-            if (parts[0] == username || parts[0] == this.username) "$username,$pass" else it
+            if (parts[0] == originalUsername) "$username,$pass" else it
         }
 
-        val contains = updated.any { it.startsWith("$username,") }
-        val finalLines = if (!contains) updated + "$username,$pass" else updated
-
-        file.writeText(finalLines.joinToString("\n"))
+        file.writeText(updated.joinToString("\n"))
     }
 }
 
@@ -1356,7 +1342,7 @@ fun main() {
                     }
                     is LibrarianLoggedIn -> { // <--- Correct (imported from UserLoginResult.*)
                         // User is logged in as a librarian, transition to librarian dashboard
-                        currentAppState = userLibrarian(result.librarian.username, result.librarian.pass).librarianPage()
+                        currentAppState = userLibrarian(result.librarian.username, result.librarian.pass, Library()).librarianPage()
                     }
                     ExitApp -> { // <--- Correct (imported from UserLoginResult.*)
                         // User chose to exit from the initial login/signup menu
@@ -1392,7 +1378,7 @@ fun main() {
                 // Similar logic for librarians
                 if (activeLibrarian != null) {
                     // Call the librarianPage, which handles all librarian interactions
-                    currentAppState = userLibrarian(activeLibrarian.username, activeLibrarian.pass).librarianPage()
+                    currentAppState = userLibrarian(activeLibrarian.username, activeLibrarian.pass, Library()).librarianPage()
 
                     // If the librarian logged out, clear the activeLibrarian.
                     if (currentAppState == LOGIN_SIGNUP) { // Assuming librarians also log out to LOGIN_SIGNUP
