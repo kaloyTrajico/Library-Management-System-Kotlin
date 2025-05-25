@@ -78,33 +78,63 @@ class Library {
         book.author,
         book.isbn,
         book.available.toString(),
-        book.borrowedBy ?: "",
-        book.dueDate?.toString() ?: ""
+        //book.borrowedBy ?: "",
+        //book.dueDate?.toString() ?: ""
     ).joinToString(",")
 
     file.appendText("$line\n")
 }
+/* 
+fun saveAllBooks() {
+    try {
+        File("books.csv").printWriter().use { out ->
+            out.println("Title,Author,ISBN,Available") // header
+            for (book in books) {
+                out.println("${book.title},${book.author},${book.isbn},${book.available.toString().uppercase()}")
+            }
+        }
+    } catch (e: Exception) {
+        println("Error saving books: ${e.message}")
+    }
+}*/
 
 fun saveAllBooks() {
-    val file = File("books.csv")
-    val lines = books.map { book ->
-        listOf(
-            book.title,
-            book.author,
-            book.isbn,
-            book.available.toString(),
-            book.borrowedBy ?: "",
-            book.dueDate?.toString() ?: ""
-        ).joinToString(",")
+    try {
+        File("books.csv").printWriter().use { out ->
+            out.println("Title,Author,ISBN,Available") // header
+            books.forEach { book ->
+                val availability = if (book.available) "TRUE" else "FALSE"
+                out.println("${book.title},${book.author},${book.isbn},$availability")
+            }
+        }
+    } catch (e: Exception) {
+        println("Error saving books: ${e.message}")
     }
-    file.writeText(lines.joinToString("\n"))  
 }
-
 
     fun addBook(book: Book) {
         books.add(book)
         saveAllBooks()
     }
+/* 
+    fun appendBookToCSV(book: Book, filePath: String) {
+        val file = File(filePath)
+        if (!file.exists()) {
+            file.writeText("Title,Author,ISBN,Available\n") // write header if file doesn't exist
+        }
+        file.appendText("${book.title},${book.author},${book.isbn},${book.available.toString().uppercase()}\n")
+    }
+*/
+
+fun appendBookToCSV(book: Book, filePath: String) {
+    try {
+        File(filePath).appendText(
+            "${book.title},${book.author},${book.isbn},${if (book.available) "TRUE" else "FALSE"}\n"
+        )
+    } catch (e: Exception) {
+        println("Error appending book to CSV: ${e.message}")
+    }
+}
 
     fun removeBookByISBN(isbn: String): Boolean {
         val removed = books.removeIf { it.isbn == isbn }
@@ -114,6 +144,10 @@ fun saveAllBooks() {
 
     fun getBookByISBN(isbn: String): Book? {
         return books.find { it.isbn == isbn }
+    }
+
+    fun normalizeISBN(input: String): String {
+        return if (input.startsWith("978-")) input else "978-$input"
     }
 
     
@@ -248,13 +282,13 @@ fun saveAllBooks() {
         val books = mutableListOf<Book>()
         try {
             File(filePath).useLines { lines ->
-                lines.drop(0).forEach { line -> // Skip header
+                lines.drop(1).forEach { line -> // Skip header
                     val parts = line.split(",")
                     if (parts.size >= 4) {
-                        val title = parts[0]
-                        val author = parts[1]
-                        val isbn = parts[2]
-                        val available = parts[3].toBooleanStrictOrNull() ?: true
+                        val title = parts[0].trim()
+                        val author = parts[1].trim()
+                        val isbn = parts[2].trim()
+                        val available = parts[3].trim().equals("TRUE", ignoreCase = true)
                         books.add(Book(title, author, isbn, available))
                     }
                 }
@@ -266,7 +300,19 @@ fun saveAllBooks() {
     }
 }
 
-
+fun saveBooksToCSV(books: List<Book>, filePath: String) {
+    try {
+        File(filePath).printWriter().use { out ->
+            out.println("Title,Author,ISBN,Available") // Write header
+            //books.forEach { book ->
+            for (book in books){
+                out.println("${book.title},${book.author},${book.isbn},${book.available.toString().uppercase()}")
+            }
+        }
+    } catch (e: Exception) {
+        println("Error writing to CSV: ${e.message}")
+    }
+}
 
 class LogInSignUp{
     var retrievedUsers = retrieveReaders().toMutableList()
@@ -603,7 +649,7 @@ class userReader(var username: String, var password: String){
             } catch(e: Exception){
                 println("Error: Invalid input. Please enter a valid number.")
             }
-            
+
             when(choice) {
                 1 -> {
                     println("Library")
@@ -612,7 +658,9 @@ class userReader(var username: String, var password: String){
                 }
                 2 -> publishBook()
                 3 -> borrowBook()
-                4 -> returnBook()
+                4 -> {returnBook()
+                        val library = Library()
+                        library.saveAllBooks()}
                 5 -> rateBook()
                 6 -> viewBorrowedBooks()
                 7 -> viewReadingHistory()
@@ -626,7 +674,9 @@ class userReader(var username: String, var password: String){
                     }
                 }
                 11 -> {
+                    val library = Library ()
                     println("Logging out...")
+                    library.saveAllBooks()
                     return LOGIN_SIGNUP // Indicate that we want to go back to login/signup
                 }
                 else -> { // Handle invalid choices
@@ -894,6 +944,8 @@ class userReader(var username: String, var password: String){
             File("library-data/reading_history.csv").appendText("$username,${book.title},${book.author},${book.isbn},$timestamp\n")
             val newCount = getBooksRead() + 1
             updateBooksReadInCSV(newCount)
+            book.available = false
+            library.saveAllBooks()
             println("You have borrowed \"${book.title}\".")
         } else {
             println("Book not available or not found.")
@@ -901,6 +953,7 @@ class userReader(var username: String, var password: String){
     }
 
     fun returnBook() {
+
         println("+-------------------------------------------+")
         println("|               RETURN A BOOK               |")
         println("+-------------------------------------------+")
@@ -929,8 +982,11 @@ class userReader(var username: String, var password: String){
                 }
             }
             file.writeText(filtered.joinToString("\n") + "\n")
-            println("You have returned \"${book.title}\".")
-        } else {
+            book.available = true
+            println("You have returned \"${book.title}\".") 
+        }
+        
+        else {
             println("Invalid selection.")
         }
     }
@@ -1159,26 +1215,28 @@ class userLibrarian(var username: String, var pass: String, val library: Library
 
     // ----- Book Management -----
     fun addBook(scanner: Scanner) {
-        println("+-------------------------------------------+")
-        println("|               ADD A BOOK                  |")
-        println("+-------------------------------------------+")
-        print("Enter book title: ")
-        val title = scanner.nextLine()
-        print("Enter author: ")
-        val author = scanner.nextLine()
-        print("Enter ISBN: ")
-        val isbn = scanner.nextLine()
+    println("+-------------------------------------------+")
+    println("|               ADD A BOOK                  |")
+    println("+-------------------------------------------+")
+    print("Enter book title: ")
+    val title = scanner.nextLine()
+    print("Enter author: ")
+    val author = scanner.nextLine()
+    print("Enter ISBN: ")
+    val isbn = scanner.nextLine()
+    val normalizedIsbn = library.normalizeISBN(isbn)
 
-        if (title.isBlank() || author.isBlank() || isbn.isBlank()) {
-            println("Invalid input. All fields are required.")
-            return
-        }
-
-        val newBook = Book(title, author, isbn, available = true)
-        library.addBook(newBook)
-        println("Book added successfully.")
-        library.saveBook(newBook)
+    if (title.isBlank() || author.isBlank() || isbn.isBlank()) {
+        println("Invalid input. All fields are required.")
+        return
     }
+
+    val newBook = Book(title, author, normalizedIsbn, available = true)
+    library.addBook(newBook)
+    println("Book added successfully.")
+    library.saveBook(newBook)
+    library.appendBookToCSV(newBook, "books.csv")
+}
 
     fun removeBook(scanner: Scanner) {
         println("+-------------------------------------------+")
@@ -1230,7 +1288,7 @@ class userLibrarian(var username: String, var pass: String, val library: Library
             println("|        LIST OF BORROWED BOOKS             |")
             println("+-------------------------------------------+")
             borrowed.forEach {
-                println("${it.title} | ISBN: ${it.isbn} | Borrowed by: ${it.borrowedBy}")
+                println("${it.title} | ISBN: ${it.isbn}")
             }
         }
     }
@@ -1245,7 +1303,7 @@ class userLibrarian(var username: String, var pass: String, val library: Library
             println("|          LIST OF OVERDUE BOOKS            |")
             println("+-------------------------------------------+")
             overdue.forEach {
-                println("${it.title} | ISBN: ${it.isbn} | Due: ${it.dueDate} | Borrowed by: ${it.borrowedBy}")
+                println("${it.title} | ISBN: ${it.isbn}")
             }
         }
     }
