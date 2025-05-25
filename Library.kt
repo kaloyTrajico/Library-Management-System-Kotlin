@@ -3,8 +3,10 @@ import kotlin.system.exitProcess
 import java.io.File
 import java.time.Instant
 
+
 // Import all members from AppState enum class
 import AppState.*
+
 // Import all members from UserLoginResult sealed class
 import UserLoginResult.*
 
@@ -38,7 +40,6 @@ enum class AppState {
     EXIT
 }
 
-// Sealed class to represent the result of a login/signup attempt
 sealed class UserLoginResult {
     object StayOnLogin : UserLoginResult() // Failed login/signup, stay on login screen
     object ExitApp : UserLoginResult()     // User chose to exit from the initial menu
@@ -47,7 +48,7 @@ sealed class UserLoginResult {
 }
 
 
-// Library class represents the collection of books and members
+
 class Library {
     val userManager = LogInSignUp()
     var currentUsers = userManager.retrieveReaders().toMutableList()
@@ -62,7 +63,7 @@ class Library {
         
         if (searchResults.isEmpty()) {
             println("No books found for '$query'")
-            return false // Indicate failure
+            return false 
         }
 
         println("\n--- Search Results ---")
@@ -71,7 +72,6 @@ class Library {
         }
         println("----------------------\n")
         
-         // Prompt user to select a book if multiple results
         val selectedBook: Book? = if (searchResults.size == 1) {
             searchResults.first()
         } else {
@@ -86,7 +86,7 @@ class Library {
         }
 
         if (selectedBook == null) {
-            return false // No book selected or invalid choice
+            return false 
         }
 
         if (!selectedBook.available) {
@@ -98,7 +98,7 @@ class Library {
         val currentUser = currentUsers.find { it.username.equals(username, ignoreCase = true) }
         if (currentUser == null) {
             println("Error: User '$username' not found in system.")
-            return false // User not found
+            return false 
         }
 
 
@@ -108,8 +108,7 @@ class Library {
         
         println("Congratulations! You have just finished reading '${selectedBook.title}'")
         currentUser.numberOfBooksRead++
-         // Save the updated user data back to the CSV
-        return saveReadChanges(currentUsers) // Delegate saving to a dedicated function       
+        return saveReadChanges(currentUsers)
     }
 
     
@@ -145,13 +144,13 @@ class Library {
             }
         }
         return when (choice) {
-            1 -> LibraryMethods(username) // This now needs to return an AppState
+            1 -> LibraryMethods(username) 
             2 -> {
                 readerOfTheWeek()
-                READER_DASHBOARD // After showing reader of the week, return to the reader dashboard
+                READER_DASHBOARD 
             }
-            3 -> READER_DASHBOARD // Return to the reader's main menu
-            else -> READER_DASHBOARD // Fallback (shouldn't be hit due to input validation)
+            3 -> READER_DASHBOARD 
+            else -> READER_DASHBOARD 
         }
     }
 
@@ -187,7 +186,7 @@ class Library {
         when(choice){
             1 -> {
                 displayBooks()
-                return LibraryMethods(username) // After displaying, stay in LibraryMethods menu
+                return LibraryMethods(username) 
             }
             2 -> { 
                 println("+-------------------------------+")
@@ -203,14 +202,11 @@ class Library {
                 return READER_DASHBOARD 
             }
             else -> {
-                // This 'else' should ideally not be reached due to the `break` in the loop
-                // but if it is, you might want to return to a default state or re-enter the loop.
-                return LibraryMethods(username) // Default to staying in this menu
+                return LibraryMethods(username) 
             }
         }
     }
 
-    //TODO
     fun readerOfTheWeek() {
         var reader = loadReaderOfTheWeek()
         println("+----------------------------------------------------------------+")
@@ -228,8 +224,7 @@ class Library {
 
 
     fun loadReaderOfTheWeek(): Users? {
-        val allUsers = userManager.retrieveReaders() // Load fresh data
-        // Use maxByOrNull to find the user with the maximum numberOfBooksRead
+        val allUsers = userManager.retrieveReaders() 
         return allUsers.maxByOrNull { it.numberOfBooksRead }
     }
 
@@ -255,7 +250,7 @@ class Library {
         val books = mutableListOf<Book>()
         try {
             File(filePath).useLines { lines ->
-                lines.drop(1).forEach { line -> // Skip header
+                lines.drop(1).forEach { line -> 
                     val parts = line.split(",")
                     if (parts.size >= 4) {
                         val title = parts[0]
@@ -276,13 +271,13 @@ class Library {
         val USER_CSV_FILE = File("user.csv")
         try{
             val lines = mutableListOf<String>()
-            lines.add("username,password,numberOfBooksRead") // Add header
+            lines.add("username,password,numberOfBooksRead") 
 
             users.forEach { user ->
                 lines.add("${user.username},${user.pass},${user.numberOfBooksRead}")
             }
 
-            USER_CSV_FILE.writeText(lines.joinToString("\n")) // Write all lines back to the file
+            USER_CSV_FILE.writeText(lines.joinToString("\n")) 
             println("User data saved successfully.")
             return true
         } catch (e: Exception) {
@@ -313,8 +308,6 @@ class Library {
             book.author,
             book.isbn,
             book.available.toString(),
-            //book.borrowedBy ?: "",
-            //book.dueDate?.toString() ?: ""
         ).joinToString(",")
 
         file.appendText("$line\n")
@@ -366,8 +359,7 @@ class Library {
     fun saveBooksToCSV(books: List<Book>, filePath: String) {
         try {
             File(filePath).printWriter().use { out ->
-                out.println("Title,Author,ISBN,Available") // Write header
-                //books.forEach { book ->
+                out.println("Title,Author,ISBN,Available") 
                 for (book in books){
                     out.println("${book.title},${book.author},${book.isbn},${book.available.toString().uppercase()}")
                 }
@@ -436,7 +428,7 @@ class LogInSignUp{
                     2 -> signUpLibrarian()
                     else ->{
                         println("You must specify what type of user you are")
-                        StayOnLogin // Invalid user type selection
+                        StayOnLogin 
                     }
                 }
         
@@ -485,11 +477,11 @@ class LogInSignUp{
         val foundUser = retrievedUsers.find { it.username == username && it.pass == password }
         return if (foundUser != null){
             println("Reader login successful.")
-            ReaderLoggedIn(foundUser) // <--- Correctly returns UserLoginResult
+            ReaderLoggedIn(foundUser) 
         } else {
             println("No existing account or incorrect credentials.")
             println("Sign up first or try again.")
-            StayOnLogin // <--- Correctly returns UserLoginResult
+            StayOnLogin 
         } 
     }
 
@@ -508,11 +500,11 @@ class LogInSignUp{
         val foundLibrarian = retrievedLibrariansUsers.find { it.username == username && it.pass == password }
         return if (foundLibrarian != null){
             println("Librarian login successful.")
-            LibrarianLoggedIn(foundLibrarian) // <--- Correctly returns UserLoginResult
+            LibrarianLoggedIn(foundLibrarian) //
         } else {
             println("No existing account or incorrect credentials.")
             println("Sign up first or try again.")
-            StayOnLogin // <--- Correctly returns UserLoginResult
+            StayOnLogin 
         }
     }
 
@@ -532,16 +524,16 @@ class LogInSignUp{
         print("Set Password: ")
         var password = scanner.nextLine()
 
-        if (retrievedUsers.any { it.username == username }) { // Use `any` for clearer "exists" check
+        if (retrievedUsers.any { it.username == username }) { 
             println("Username already exists! Try a different one.")
             return StayOnLogin
         }   
 
         saveSignUpReaderAcc(username, password)
         val newUser = Users(username, password, 0)
-        retrievedUsers.add(newUser) // Add to in-memory list
+        retrievedUsers.add(newUser) 
         println("Account created successfully for $username.")
-        return ReaderLoggedIn(newUser) // <--- Correctly returns UserLoginResult with the new user
+        return ReaderLoggedIn(newUser)
     }
 
     fun signUpLibrarian(): UserLoginResult {
@@ -560,23 +552,23 @@ class LogInSignUp{
         print("Set Password: ")
         var password = scanner.nextLine()
         
-        if (retrievedLibrariansUsers.any { it.username == username }) { // Use `any` for clearer "exists" check
+        if (retrievedLibrariansUsers.any { it.username == username }) { 
             println("Username already exists! Try a different one.")
             return StayOnLogin
         }
 
         saveSignUpLibrarianAcc(username, password)
         val newLibrarian = Librarians(username, password)
-        retrievedLibrariansUsers.add(newLibrarian) // Add to in-memory list
+        retrievedLibrariansUsers.add(newLibrarian) 
         println("Account created successfully for $username.")
-        return LibrarianLoggedIn(newLibrarian) // <--- Correctly returns UserLoginResult with the new librarian
+        return LibrarianLoggedIn(newLibrarian) 
     }
 
     fun retrieveReaders(): List<Users>{
         val users = mutableListOf<Users>()
         try {
             File("user.csv").useLines { lines ->
-                lines.drop(1).forEach { line -> // Skip header
+                lines.drop(1).forEach { line -> 
                     val parts = line.split(",")
                     if (parts.size >= 3) {
                         val username = parts[0]
@@ -596,7 +588,7 @@ class LogInSignUp{
         val users = mutableListOf<Librarians>()
         try {
             File("librarian.csv").useLines { lines ->
-                lines.drop(1).forEach { line -> // Skip header
+                lines.drop(1).forEach { line -> 
                     val parts = line.split(",")
                     if (parts.size >= 2) {
                         val username = parts[0]
@@ -621,20 +613,17 @@ class LogInSignUp{
 
     fun saveSignUpReaderAcc(username: String, password: String) {
         val file = File("user.csv")
-        val newLine = "$username,$password,0" // numberOfBooksRead starts at 0
+        val newLine = "$username,$password,0" 
 
         try {
-            // If the file doesn't exist, create it and write the header first
             if (!file.exists()) {
                 file.writeText("readerName,password,numberOfBooksRead\n")
             }
 
-            // Ensure the file ends with a newline before appending
             if (!file.readText().endsWith("\n")) {
                 file.appendText("\n")
             }   
 
-            // Append the new user line
             file.appendText("$newLine\n")
             println("User account for '$username' created successfully.")
         } catch (e: Exception) {
@@ -648,17 +637,14 @@ class LogInSignUp{
         val newLine = "$username,$password" 
 
         try {
-            // If the file doesn't exist, create it and write the header first
             if (!file.exists()) {
                 file.writeText("readerName,password\n")
             }
 
-            // Ensure the file ends with a newline before appending
             if (!file.readText().endsWith("\n")) {
                 file.appendText("\n")
             }   
 
-            // Append the new user line
             file.appendText("$newLine\n")
             println("User account for '$username' created successfully.")
         } catch (e: Exception) {
@@ -675,7 +661,7 @@ class userReader(var username: String, var password: String){
         println("+---------------------------------------+")
         println("|       LIBRARY MANAGEMENT SYSTEM       |")
         println("+---------------------------------------+")
-        println("Initialized reader dashboard...") // More specific message
+        println("Initialized reader dashboard...") 
     }
 
     fun readerPage(): AppState{ 
@@ -738,9 +724,9 @@ class userReader(var username: String, var password: String){
                 }
                 11 -> {
                     println("Logging out...")
-                    return LOGIN_SIGNUP // Indicate that we want to go back to login/signup
+                    return LOGIN_SIGNUP 
                 }
-                else -> { // Handle invalid choices
+                else -> { 
                     println("Invalid choice. Please select a number between 1 and 11.")
                 }
             }
@@ -958,8 +944,6 @@ class userReader(var username: String, var password: String){
         return books
     }
 
-    
-    // MAIN FUNCTIONS
     fun publishBook(){
         val scanner = Scanner(System.`in`)
         var bookName: String = ""
@@ -1201,8 +1185,7 @@ class userReader(var username: String, var password: String){
     }
 }
 
-// TODO
-// You need to have save function to update the librarian.csv
+
 class userLibrarian(var username: String, var pass: String, val library: Library) {
 
     var originalUsername = username
@@ -1266,7 +1249,6 @@ class userLibrarian(var username: String, var pass: String, val library: Library
         }
     }
 
-    // ----- Book Management -----
     fun addBook(scanner: Scanner) {
         println("+-------------------------------------------+")
         println("|               ADD A BOOK                  |")
@@ -1393,7 +1375,6 @@ class userLibrarian(var username: String, var pass: String, val library: Library
         println("Overdue: $overdue")
     }
 
-    // ----- Account Management -----
     fun manageAccount(scanner: Scanner): Boolean {
         while (true) {
             println("+--------- MANAGE ACCOUNT ----------+")
@@ -1491,62 +1472,48 @@ fun ExitPage(){
 
 fun main() {
     val loginSignUp = LogInSignUp()
-    var currentAppState: AppState = LOGIN_SIGNUP // <--- Correct (imported from AppState.*)
+    var currentAppState: AppState = LOGIN_SIGNUP 
     val library = Library()
     var activeReader: Users? = null
     var activeLibrarian: Librarians? = null
 
-    while (currentAppState != EXIT) { // <--- Correct (imported from AppState.*)
+    while (currentAppState != EXIT) { 
         when (currentAppState) {
-            LOGIN_SIGNUP -> { // <--- Correct (imported from AppState.*)
+            LOGIN_SIGNUP -> { 
                 val result = loginSignUp.InitUserAndGetUser()
-                when (result) { // This 'when' is exhaustive because UserLoginResult is a sealed class
-                    is ReaderLoggedIn -> { // <--- Correct (imported from UserLoginResult.*)
-                        // User is logged in as a reader, transition to reader dashboard
+                when (result) { 
+                    is ReaderLoggedIn -> {
                         currentAppState = userReader(result.user.username, result.user.pass).readerPage()
                     }
-                    is LibrarianLoggedIn -> { // <--- Correct (imported from UserLoginResult.*)
-                        // User is logged in as a librarian, transition to librarian dashboard
+                    is LibrarianLoggedIn -> { 
                         currentAppState = userLibrarian(result.librarian.username, result.librarian.pass, library).librarianPage()
                     }
-                    ExitApp -> { // <--- Correct (imported from UserLoginResult.*)
-                        // User chose to exit from the initial login/signup menu
-                        currentAppState = EXIT // <--- Correct (imported from AppState.*)
+                    ExitApp -> { 
+                        currentAppState = EXIT 
                     }
-                    StayOnLogin -> { // <--- Correct (imported from UserLoginResult.*)
-                        // Login or signup failed, stay on the login/signup screen
-                        // currentAppState is already LOGIN_SIGNUP, so no change needed.
-                    }
+                    StayOnLogin -> {}
                 }
             }
 
             READER_DASHBOARD -> {
-                // If we are in READER_DASHBOARD, we should call the reader's main page.
-                // It's crucial that `activeReader` is not null here.
                 if (activeReader != null) {
-                    // Call the readerPage, which handles all reader interactions
-                    // and returns the *next* AppState (e.g., LOGIN_SIGNUP on logout/delete).
                     currentAppState = userReader(activeReader.username, activeReader.pass).readerPage()
-
-                    // If the reader logged out or deleted their account, clear the activeReader.
                     if (currentAppState == LOGIN_SIGNUP) {
                         activeReader = null
                     }
                 } else {
-                    // This state should ideally only be entered after a successful ReaderLoggedIn.
-                    // If activeReader is somehow null, it's an unexpected state; return to login.
+                    
                     println("Error: Reader dashboard reached without active reader. Returning to login.")
                     currentAppState = LOGIN_SIGNUP
                 }
             }
             LIBRARIAN_DASHBOARD -> {
-                // Similar logic for librarians
+                
                 if (activeLibrarian != null) {
-                    // Call the librarianPage, which handles all librarian interactions
+                    
                     currentAppState = userLibrarian(activeLibrarian.username, activeLibrarian.pass, library).librarianPage()
-
-                    // If the librarian logged out, clear the activeLibrarian.
-                    if (currentAppState == LOGIN_SIGNUP) { // Assuming librarians also log out to LOGIN_SIGNUP
+                    
+                    if (currentAppState == LOGIN_SIGNUP) { 
                         activeLibrarian = null
                     }
                 } else {
@@ -1555,11 +1522,8 @@ fun main() {
                 }
             }
             EXIT -> {
-                // When currentAppState becomes EXIT, the `while` loop condition (currentAppState != EXIT)
-                // becomes false, and the loop naturally terminates.
-                // We'll call ExitPage() after the loop.
             }
         }
     }
-    ExitPage() // Call ExitPage only when the main loop exits
+    ExitPage() 
 }
