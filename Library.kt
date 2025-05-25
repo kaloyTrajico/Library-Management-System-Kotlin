@@ -72,69 +72,47 @@ class Library {
     }
 
     fun saveBook(book: Book) {
-    val file = File("books.csv")
-    val line = listOf(
-        book.title,
-        book.author,
-        book.isbn,
-        book.available.toString(),
-        //book.borrowedBy ?: "",
-        //book.dueDate?.toString() ?: ""
-    ).joinToString(",")
+        val file = File("books.csv")
+        val line = listOf(
+            book.title,
+            book.author,
+            book.isbn,
+            book.available.toString(),
+            //book.borrowedBy ?: "",
+            //book.dueDate?.toString() ?: ""
+        ).joinToString(",")
 
-    file.appendText("$line\n")
-}
-/* 
-fun saveAllBooks() {
-    try {
-        File("books.csv").printWriter().use { out ->
-            out.println("Title,Author,ISBN,Available") // header
-            for (book in books) {
-                out.println("${book.title},${book.author},${book.isbn},${book.available.toString().uppercase()}")
-            }
-        }
-    } catch (e: Exception) {
-        println("Error saving books: ${e.message}")
+        file.appendText("$line\n")
     }
-}*/
 
-fun saveAllBooks() {
-    try {
-        File("books.csv").printWriter().use { out ->
-            out.println("Title,Author,ISBN,Available") // header
-            books.forEach { book ->
-                val availability = if (book.available) "TRUE" else "FALSE"
-                out.println("${book.title},${book.author},${book.isbn},$availability")
+    fun saveAllBooks() {
+        try {
+            File("books.csv").printWriter().use { out ->
+                out.println("Title,Author,ISBN,Available") // header
+                books.forEach { book ->
+                    val availability = if (book.available) "TRUE" else "FALSE"
+                    out.println("${book.title},${book.author},${book.isbn},$availability")
+                }
             }
+        } catch (e: Exception) {
+            println("Error saving books: ${e.message}")
         }
-    } catch (e: Exception) {
-        println("Error saving books: ${e.message}")
     }
-}
 
     fun addBook(book: Book) {
         books.add(book)
         saveAllBooks()
     }
-/* 
-    fun appendBookToCSV(book: Book, filePath: String) {
-        val file = File(filePath)
-        if (!file.exists()) {
-            file.writeText("Title,Author,ISBN,Available\n") // write header if file doesn't exist
-        }
-        file.appendText("${book.title},${book.author},${book.isbn},${book.available.toString().uppercase()}\n")
-    }
-*/
 
-fun appendBookToCSV(book: Book, filePath: String) {
-    try {
-        File(filePath).appendText(
-            "${book.title},${book.author},${book.isbn},${if (book.available) "TRUE" else "FALSE"}\n"
-        )
-    } catch (e: Exception) {
-        println("Error appending book to CSV: ${e.message}")
+    fun appendBookToCSV(book: Book, filePath: String) {
+        try {
+            File(filePath).appendText(
+                "${book.title},${book.author},${book.isbn},${if (book.available) "TRUE" else "FALSE"}\n"
+            )
+        } catch (e: Exception) {
+            println("Error appending book to CSV: ${e.message}")
+        }
     }
-}
 
     fun removeBookByISBN(isbn: String): Boolean {
         val removed = books.removeIf { it.isbn == isbn }
@@ -1154,7 +1132,6 @@ class userLibrarian(var username: String, var pass: String, val library: Library
 
     var originalUsername = username
 
-    
     fun librarianPage(): AppState {
         println("+---------------------------------------+")
         println("        WELCOME  $username!")
@@ -1215,28 +1192,28 @@ class userLibrarian(var username: String, var pass: String, val library: Library
 
     // ----- Book Management -----
     fun addBook(scanner: Scanner) {
-    println("+-------------------------------------------+")
-    println("|               ADD A BOOK                  |")
-    println("+-------------------------------------------+")
-    print("Enter book title: ")
-    val title = scanner.nextLine()
-    print("Enter author: ")
-    val author = scanner.nextLine()
-    print("Enter ISBN: ")
-    val isbn = scanner.nextLine()
-    val normalizedIsbn = library.normalizeISBN(isbn)
+        println("+-------------------------------------------+")
+        println("|               ADD A BOOK                  |")
+        println("+-------------------------------------------+")
+        print("Enter book title: ")
+        val title = scanner.nextLine()
+        print("Enter author: ")
+        val author = scanner.nextLine()
+        print("Enter ISBN: ")
+        val isbn = scanner.nextLine()
+        val normalizedIsbn = library.normalizeISBN(isbn)
 
-    if (title.isBlank() || author.isBlank() || isbn.isBlank()) {
-        println("Invalid input. All fields are required.")
-        return
+        if (title.isBlank() || author.isBlank() || isbn.isBlank()) {
+            println("Invalid input. All fields are required.")
+            return
+        }
+
+        val newBook = Book(title, author, normalizedIsbn, available = true)
+        library.addBook(newBook)
+        println("Book added successfully.")
+        library.saveBook(newBook)
+        library.appendBookToCSV(newBook, "books.csv")
     }
-
-    val newBook = Book(title, author, normalizedIsbn, available = true)
-    library.addBook(newBook)
-    println("Book added successfully.")
-    library.saveBook(newBook)
-    library.appendBookToCSV(newBook, "books.csv")
-}
 
     fun removeBook(scanner: Scanner) {
         println("+-------------------------------------------+")
